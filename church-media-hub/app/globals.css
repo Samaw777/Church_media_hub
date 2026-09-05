@@ -1,0 +1,68 @@
+@import url("https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap");
+@import "tailwindcss";
+
+:root {
+  --bg: #101315;
+  --panel: #181c1f;
+  --panel-2: #1d2225;
+  --border: #2a2f33;
+  --text: #ecece4;
+  --muted: #9ba1a6;
+  --muted-2: #5f6469;
+  --tally: #e4483c;
+  --ok: #3fb88a;
+  --warn: #e3a83d;
+  --font-head: "Space Grotesk", sans-serif;
+  --font-body: "Inter", sans-serif;
+  --font-mono: "IBM Plex Mono", monospace;
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-panel: var(--panel);
+  --color-panel-2: var(--panel-2);
+  --color-border: var(--border);
+  --color-text: var(--text);
+  --color-muted: var(--muted);
+  --color-muted-2: var(--muted-2);
+  --color-tally: var(--tally);
+  --color-ok: var(--ok);
+  --color-warn: var(--warn);
+  --font-head: var(--font-head);
+  --font-body: var(--font-body);
+  --font-mono: var(--font-mono);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-body);
+}
+
+::selection {
+  background: var(--tally);
+  color: #160705;
+}
+
+@keyframes pulse-dot {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.35;
+  }
+}
+.tally-dot {
+  animation: pulse-dot 2s ease-in-out infinite;
+}
+
+input,
+textarea {
+  font-family: inherit;
+}
