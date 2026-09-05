@@ -2,12 +2,13 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Calendar, Radio, Wrench, ListChecks, CircleDot, LogOut } from "lucide-react";
+import { Calendar, CalendarDays, Radio, Wrench, ListChecks, CircleDot, LogOut } from "lucide-react";
 import { useMember } from "./MemberProvider";
 
 const ITEMS = [
   { href: "/", label: "Home", icon: CircleDot },
   { href: "/schedule", label: "Schedule", icon: Calendar },
+  { href: "/calendar", label: "Calendar", icon: CalendarDays },
   { href: "/stream-setup", label: "Stream Setup", icon: Radio },
   { href: "/troubleshooting", label: "Troubleshooting", icon: Wrench },
   { href: "/checklist", label: "Sunday Checklist", icon: ListChecks },
@@ -15,7 +16,7 @@ const ITEMS = [
 
 export function Sidebar() {
   const pathname = usePathname();
-  const { me, switchUser } = useMember();
+  const { me, isAdmin, signOut } = useMember();
 
   return (
     <nav className="md:w-56 w-full bg-panel border-b md:border-b-0 md:border-r border-border flex md:flex-col shrink-0 md:min-h-screen">
@@ -47,8 +48,18 @@ export function Sidebar() {
         })}
       </div>
       <div className="hidden md:flex items-center justify-between gap-2 px-5 py-4 border-t border-border mt-auto">
-        <span className="text-sm text-muted truncate">{me}</span>
-        <button onClick={switchUser} title="Not you?" className="text-muted-2 hover:text-text">
+        <span className="text-sm text-muted truncate flex items-center gap-1.5">
+          {me}
+          {isAdmin && (
+            <span
+              className="text-[10px] px-1.5 py-0.5 uppercase text-tally border border-tally"
+              style={{ fontFamily: "var(--font-mono)" }}
+            >
+              Admin
+            </span>
+          )}
+        </span>
+        <button onClick={signOut} title="Sign out" className="text-muted-2 hover:text-text">
           <LogOut size={14} />
         </button>
       </div>

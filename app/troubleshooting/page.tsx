@@ -1,35 +1,14 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { AlertTriangle, ChevronDown, Plus, Trash2 } from "lucide-react";
+import { AlertTriangle, ChevronDown, Plus, Trash2, X } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { timeLabel } from "@/lib/dates";
 import { useMember } from "@/components/MemberProvider";
 import { PageHeader } from "@/components/Ui";
+import { ScreenshotUpload } from "@/components/ScreenshotUpload";
 import type { Issue } from "@/lib/types";
-
-const TROUBLESHOOTING = [
-  {
-    q: "No picture from a camera in Wirecast",
-    a: "Check the cable at both ends first — HDMI/SDI connectors work loose easily. Then confirm the correct capture device is selected on that shot (right-click the shot → Camera). If it's still black, unplug and replug the capture device and restart Wirecast.",
-  },
-  {
-    q: "Audio is out of sync with video",
-    a: "Open the audio source's settings and adjust the delay in small steps (50–100ms) until it lines up. If it drifts over time rather than being consistently off, restart Wirecast before going live — that usually means a clock-drift issue between devices.",
-  },
-  {
-    q: "Stream won't go live / YouTube shows no signal",
-    a: "Re-check the stream key hasn't changed (YouTube issues a new one per scheduled event unless you're using a persistent key). Confirm Wirecast's Output Settings still has the right server URL and key, and that you clicked Start Broadcast in Wirecast, not just previewed it.",
-  },
-  {
-    q: "Stream is choppy or keeps buffering",
-    a: "This is almost always upload bandwidth. Move the streaming computer to wired ethernet, pause any other downloads/backups on the network, and lower Wirecast's output bitrate a step. Aim for upload speed at least 1.5x your stream's bitrate.",
-  },
-  {
-    q: "Wirecast is lagging or crashes",
-    a: "Close other GPU-heavy apps running on the same machine. Check Wirecast is updated. If it keeps happening, try lowering the output resolution or the number of live sources/layers on screen at once.",
-  },
-];
+import { TROUBLESHOOTING } from "@/lib/knowledge";
 
 export default function TroubleshootingPage() {
   const { me } = useMember();
@@ -39,6 +18,7 @@ export default function TroubleshootingPage() {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [severity, setSeverity] = useState<"low" | "medium" | "high">("medium");
+  const [screenshotUrl, setScreenshotUrl] = useState("");
 
   async function loadIssues() {
     const { data } = await supabase.from("issues").select("*").order("created_at", { ascending: false });
@@ -64,10 +44,12 @@ export default function TroubleshootingPage() {
       severity,
       reporter: me,
       status: "open",
+      screenshot_url: screenshotUrl || null,
     });
     setTitle("");
     setDescription("");
     setSeverity("medium");
+    setScreenshotUrl("");
     setShowForm(false);
   }
 
@@ -140,7 +122,7 @@ export default function TroubleshootingPage() {
             rows={3}
             className="w-full bg-bg border border-border px-3 py-2 text-sm outline-none focus:border-tally mb-3 resize-none"
           />
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between mb-3">
             <div className="flex gap-2">
               {(["low", "medium", "high"] as const).map((s) => (
                 <button
@@ -156,6 +138,21 @@ export default function TroubleshootingPage() {
                 </button>
               ))}
             </div>
+            <ScreenshotUpload pathPrefix="issues" onUploaded={setScreenshotUrl} />
+          </div>
+          {screenshotUrl && (
+            <div className="relative mb-3 inline-block">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={screenshotUrl} alt="Attached screenshot" className="max-h-40 border border-border" />
+              <button
+                onClick={() => setScreenshotUrl("")}
+                className="absolute -top-2 -right-2 bg-panel border border-border text-muted-2 hover:text-tally"
+              >
+                <X size={14} />
+              </button>
+            </div>
+          )}
+          <div className="flex justify-end">
             <button onClick={submit} className="text-sm px-4 py-2 bg-tally text-[#160705]">
               Submit
             </button>
@@ -182,6 +179,14 @@ export default function TroubleshootingPage() {
                 </span>
               </div>
               {issue.description && <p className="text-sm text-muted mb-2">{issue.description}</p>}
+              {issue.screenshot_url && (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={issue.screenshot_url}
+                  alt={`Screenshot for ${issue.title}`}
+                  className="max-h-48 border border-border mb-2"
+                />
+              )}
               <p className="text-xs text-muted-2">
                 {issue.reporter} · {timeLabel(issue.created_at)} on {new Date(issue.created_at).toLocaleDateString()}
               </p>

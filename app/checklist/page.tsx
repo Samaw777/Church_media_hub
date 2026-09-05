@@ -7,21 +7,10 @@ import { getSundays, isoDate, shortLabel, timeLabel } from "@/lib/dates";
 import { useMember } from "@/components/MemberProvider";
 import { PageHeader } from "@/components/Ui";
 import type { ChecklistItem, ChecklistState } from "@/lib/types";
-
-const DEFAULT_ITEMS = [
-  "Power on all cameras — confirm clean video in Wirecast",
-  "Check audio levels from the soundboard feed",
-  "Confirm Wirecast output is pointed at the right YouTube stream key",
-  "Run a 5-minute test stream and check YouTube's health status",
-  "Confirm lower-thirds / graphics are loaded and current",
-  "Assign someone to watch YouTube chat during service",
-  "Start local recording, if separate from the stream",
-  "Go live at the scheduled time",
-  "Double check: video + audio visible from a phone off-network",
-];
+import { DEFAULT_CHECKLIST_ITEMS as DEFAULT_ITEMS } from "@/lib/knowledge";
 
 export default function ChecklistPage() {
-  const { me } = useMember();
+  const { me, isAdmin } = useMember();
   const sunday = getSundays(1)[0];
   const sundayIso = isoDate(sunday);
 
@@ -109,12 +98,14 @@ export default function ChecklistPage() {
         eyebrow={shortLabel(sunday)}
         title="Sunday Checklist"
         right={
-          <button
-            onClick={() => setEditingItems(!editingItems)}
-            className="text-sm flex items-center gap-1.5 text-muted hover:text-text"
-          >
-            <Pencil size={14} /> {editingItems ? "Done editing" : "Edit list"}
-          </button>
+          isAdmin ? (
+            <button
+              onClick={() => setEditingItems(!editingItems)}
+              className="text-sm flex items-center gap-1.5 text-muted hover:text-text"
+            >
+              <Pencil size={14} /> {editingItems ? "Done editing" : "Edit list"}
+            </button>
+          ) : undefined
         }
       />
 

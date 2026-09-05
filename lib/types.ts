@@ -1,8 +1,26 @@
 export type AvailabilityStatus = "yes" | "no" | "maybe";
+export type MemberRole = "member" | "admin";
 
 export type Member = {
   id: string;
   name: string;
+  user_id: string | null;
+  role: MemberRole;
+  created_at: string;
+};
+
+export type Role = {
+  id: string;
+  name: string;
+  position: number;
+};
+
+export type Assignment = {
+  id: string;
+  sunday: string; // yyyy-mm-dd
+  role_id: string;
+  member_name: string;
+  assigned_by: string | null;
   created_at: string;
 };
 
@@ -30,6 +48,7 @@ export type Issue = {
   status: "open" | "resolved";
   created_at: string;
   resolved_at: string | null;
+  screenshot_url: string | null;
 };
 
 export type ChecklistItem = {

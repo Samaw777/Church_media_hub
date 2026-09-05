@@ -1,59 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { ArrowRight, Image as ImageIcon } from "lucide-react";
+import { ArrowRight, Trash2 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { PageHeader } from "@/components/Ui";
-
-const STEPS = [
-  {
-    group: "In YouTube Studio",
-    steps: [
-      {
-        title: "Create the live event",
-        body: "Go to studio.youtube.com → Create → Go Live. Set the title, privacy (Public / Unlisted / Private) and, if you're scheduling ahead, the start time.",
-      },
-      {
-        title: "Grab the stream key & server URL",
-        body: "On the stream's setup page, open Stream Settings. Copy the Stream Key and Stream URL (RTMP server address) — you'll paste both into Wirecast. Treat the key like a password; anyone with it can stream to your channel.",
-      },
-    ],
-  },
-  {
-    group: "In Wirecast",
-    steps: [
-      {
-        title: "Open Output Settings",
-        body: "Menu bar → Output → Output Settings. This is where Wirecast sends its program feed out to the internet.",
-      },
-      {
-        title: "Add YouTube as a destination",
-        body: "Click Add, then choose YouTube from the destination list and sign in with the church's Google account — Wirecast can pull your scheduled event automatically. If you'd rather connect manually, choose Custom RTMP instead and paste the Server URL into Address and the Stream Key into Stream.",
-      },
-      {
-        title: "Match the encoding settings",
-        body: "Set resolution/bitrate to YouTube's recommended values (1080p ≈ 4500–9000 Kbps, 720p ≈ 2500–4000 Kbps). Higher isn't better if your upload speed can't sustain it — that's what causes buffering.",
-      },
-      {
-        title: "Start the broadcast",
-        body: "Click Start in Wirecast's Output panel a few minutes before service. This sends video to YouTube's servers but doesn't make it public yet if the event is Unlisted — use that window to check picture and sound.",
-      },
-    ],
-  },
-  {
-    group: "Going live",
-    steps: [
-      {
-        title: "Confirm stream health",
-        body: 'In YouTube Studio\'s Stream Health panel, look for a green "Excellent" or "Good" status before switching the event to Public / hitting Go Live.',
-      },
-      {
-        title: "End cleanly afterward",
-        body: "Click Stop in Wirecast, then End Stream in YouTube Studio. Ending only one side can leave the event stuck in a live-but-frozen state for viewers.",
-      },
-    ],
-  },
-];
+import { ScreenshotUpload } from "@/components/ScreenshotUpload";
+import { STREAM_SETUP_GROUPS as STEPS } from "@/lib/knowledge";
 
 export default function StreamSetupPage() {
   const [images, setImages] = useState<Record<string, string>>({});
@@ -85,9 +37,8 @@ export default function StreamSetupPage() {
       </div>
 
       <p className="text-sm text-muted mb-8 leading-relaxed max-w-2xl">
-        These steps cover the direct Wirecast → YouTube path. Add your own screenshots to any step
-        below by pasting an image link (e.g. a Google Drive or Imgur link) — real captures from
-        your own setup will show up here for everyone.
+        These steps cover the direct Wirecast → YouTube path. Upload your own screenshot to any
+        step below — real captures from your own setup will show up here for everyone.
       </p>
 
       <div className="space-y-8">
@@ -104,6 +55,7 @@ export default function StreamSetupPage() {
                   <StepCard
                     key={stepId}
                     n={i + 1}
+                    stepId={stepId}
                     step={s}
                     image={images[key]}
                     onSetImage={(url) => setImage(stepId, url)}
@@ -120,18 +72,17 @@ export default function StreamSetupPage() {
 
 function StepCard({
   n,
+  stepId,
   step,
   image,
   onSetImage,
 }: {
   n: number;
+  stepId: string;
   step: { title: string; body: string };
   image?: string;
   onSetImage: (url: string) => void;
 }) {
-  const [editing, setEditing] = useState(false);
-  const [url, setUrl] = useState(image || "");
-
   return (
     <div className="bg-panel border border-border p-5 flex gap-4">
       <div
@@ -146,7 +97,7 @@ function StepCard({
         </h3>
         <p className="text-sm text-muted leading-relaxed mb-3">{step.body}</p>
 
-        {image && !editing && (
+        {image && (
           // eslint-disable-next-line @next/next/no-img-element
           <img
             src={image}
@@ -156,33 +107,21 @@ function StepCard({
           />
         )}
 
-        {editing ? (
-          <div className="flex gap-2">
-            <input
-              autoFocus
-              value={url}
-              onChange={(e) => setUrl(e.target.value)}
-              placeholder="Paste screenshot image URL"
-              className="flex-1 bg-bg border border-border px-3 py-1.5 text-sm outline-none focus:border-tally"
-            />
+        <div className="flex items-center gap-3">
+          <ScreenshotUpload
+            pathPrefix={`stream-setup/${stepId}`}
+            label={image ? "Replace screenshot" : "Add a screenshot"}
+            onUploaded={onSetImage}
+          />
+          {image && (
             <button
-              onClick={() => {
-                onSetImage(url.trim());
-                setEditing(false);
-              }}
-              className="text-sm px-3 py-1.5 bg-panel-2 border border-border"
+              onClick={() => onSetImage("")}
+              className="text-xs flex items-center gap-1.5 text-muted-2 hover:text-tally"
             >
-              Save
+              <Trash2 size={13} /> Remove
             </button>
-            <button onClick={() => setEditing(false)} className="text-sm px-2 text-muted">
-              Cancel
-            </button>
-          </div>
-        ) : (
-          <button onClick={() => setEditing(true)} className="text-xs flex items-center gap-1.5 text-muted-2 hover:text-muted">
-            <ImageIcon size={13} /> {image ? "Replace screenshot" : "Add a screenshot"}
-          </button>
-        )}
+          )}
+        </div>
       </div>
     </div>
   );
