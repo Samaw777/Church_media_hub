@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { ExternalLink, PlayCircle } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { getSundays, isoDate, shortLabel } from "@/lib/dates";
@@ -9,11 +10,28 @@ import { Panel, StatCard } from "@/components/Ui";
 
 const YOUTUBE_URL = "https://www.youtube.com/@zefcchurchtv2560";
 
+const ENCOURAGEMENTS = [
+  "\"Whatever you do, work at it with all your heart, as working for the Lord.\" — Colossians 3:23",
+  "\"Each of you should use whatever gift you have received to serve others.\" — 1 Peter 4:10",
+  "\"Let your light shine before others.\" — Matthew 5:16",
+  "\"Do everything without grumbling or arguing.\" — Philippians 2:14",
+  "\"Whatever you do, do it all for the glory of God.\" — 1 Corinthians 10:31",
+  "\"Be strong and courageous... the Lord your God will be with you wherever you go.\" — Joshua 1:9",
+  "\"Serve wholeheartedly, as if you were serving the Lord.\" — Ephesians 6:7",
+  "\"Give thanks in all circumstances.\" — 1 Thessalonians 5:18",
+];
+
 function greeting() {
   const hour = new Date().getHours();
   if (hour < 12) return "Good morning";
   if (hour < 18) return "Good afternoon";
   return "Good evening";
+}
+
+function encouragementOfTheDay() {
+  const start = new Date(new Date().getFullYear(), 0, 0);
+  const dayOfYear = Math.floor((Date.now() - start.getTime()) / 86400000);
+  return ENCOURAGEMENTS[dayOfYear % ENCOURAGEMENTS.length];
 }
 
 export default function HomePage() {
@@ -28,6 +46,8 @@ export default function HomePage() {
   const [openIssues, setOpenIssues] = useState(0);
   const [chatLink, setChatLink] = useState("");
   const [loading, setLoading] = useState(true);
+  const [lineup, setLineup] = useState<{ role: string; name: string | null }[]>([]);
+  const [onlineCount, setOnlineCount] = useState(1);
 
   useEffect(() => {
     let cancelled = false;
@@ -55,11 +75,63 @@ export default function HomePage() {
     };
   }, [sundayIso]);
 
+  useEffect(() => {
+    let cancelled = false;
+    async function loadLineup() {
+      const [rolesRes, assignRes] = await Promise.all([
+        supabase.from("roles").select("id, name").order("position"),
+        supabase.from("assignments").select("role_id, member_name").eq("sunday", sundayIso),
+      ]);
+      if (cancelled) return;
+      const assignMap: Record<string, string> = {};
+      (assignRes.data ?? []).forEach((a) => (assignMap[a.role_id] = a.member_name));
+      setLineup((rolesRes.data ?? []).map((r) => ({ role: r.name, name: assignMap[r.id] ?? null })));
+    }
+    loadLineup();
+
+    const channel = supabase
+      .channel(`home-lineup-${sundayIso}`)
+      .on("postgres_changes", { event: "*", schema: "public", table: "assignments", filter: `sunday=eq.${sundayIso}` }, loadLineup)
+      .on("postgres_changes", { event: "*", schema: "public", table: "roles" }, loadLineup)
+      .subscribe();
+
+    return () => {
+      cancelled = true;
+      supabase.removeChannel(channel);
+    };
+  }, [sundayIso]);
+
+  useEffect(() => {
+    if (!me) return;
+    const channel = supabase.channel("presence:online", { config: { presence: { key: me } } });
+    channel
+      .on("presence", { event: "sync" }, () => {
+        setOnlineCount(Object.keys(channel.presenceState()).length);
+      })
+      .subscribe((status) => {
+        if (status === "SUBSCRIBED") {
+          channel.track({ online_at: new Date().toISOString() });
+        }
+      });
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [me]);
+
   return (
     <div>
-      <p className="text-xs uppercase tracking-wide text-muted mb-1" style={{ fontFamily: "var(--font-mono)" }}>
-        {greeting()}
-      </p>
+      <div className="flex items-center justify-between gap-3 mb-1">
+        <p className="text-xs uppercase tracking-wide text-muted" style={{ fontFamily: "var(--font-mono)" }}>
+          {greeting()}
+        </p>
+        <span
+          className="flex items-center gap-1.5 text-xs text-muted-2 shrink-0"
+          style={{ fontFamily: "var(--font-mono)" }}
+        >
+          <span className="w-1.5 h-1.5 rounded-full bg-ok inline-block" />
+          {onlineCount} online now
+        </span>
+      </div>
       <h1 className="text-3xl mb-6" style={{ fontFamily: "var(--font-head)" }}>
         Hey {me?.split(" ")[0]}.
       </h1>
@@ -111,8 +183,8 @@ export default function HomePage() {
         <StatCard
           label="Checklist"
           value={`${doneCount}/${totalItems}`}
-          sub="steps done"
-          tally="var(--warn)"
+          sub={doneCount === totalItems && totalItems > 0 ? "all done 🎉" : "steps done"}
+          tally={doneCount === totalItems && totalItems > 0 ? "var(--ok)" : "var(--warn)"}
           href="/checklist"
           loading={loading}
         />
@@ -126,7 +198,40 @@ export default function HomePage() {
         />
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+      <div className="mb-3">
+        <Panel
+          title={`This Sunday's Lineup — ${shortLabel(thisSunday)}`}
+          action={
+            <Link href="/calendar" className="text-xs text-muted hover:text-text">
+              Full calendar →
+            </Link>
+          }
+        >
+          {lineup.length === 0 ? (
+            <p className="text-sm text-muted-2">No roles set up yet — an admin can add some on the Calendar page.</p>
+          ) : (
+            <div className="flex flex-wrap gap-2">
+              {lineup.map((l) => (
+                <div key={l.role} className="flex items-center gap-2 px-3 py-2 bg-panel-2 border border-border text-sm">
+                  <span className="text-muted-2 text-xs uppercase" style={{ fontFamily: "var(--font-mono)" }}>
+                    {l.role}
+                  </span>
+                  <span
+                    style={{
+                      color: l.name === me ? "var(--tally)" : l.name ? "var(--text)" : "var(--muted-2)",
+                      fontWeight: l.name === me ? 600 : 400,
+                    }}
+                  >
+                    {l.name ?? "Open"}
+                  </span>
+                </div>
+              ))}
+            </div>
+          )}
+        </Panel>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
         <Panel title="Team">
           <div className="flex flex-wrap gap-2">
             {roster.map((n) => (
@@ -140,6 +245,9 @@ export default function HomePage() {
             ))}
             {roster.length === 0 && <span className="text-sm text-muted-2">No one&apos;s joined yet.</span>}
           </div>
+        </Panel>
+        <Panel title="Word for the team">
+          <p className="text-sm text-muted leading-relaxed italic">{encouragementOfTheDay()}</p>
         </Panel>
         <Panel title="Group chat">
           <p className="text-sm text-muted mb-3 leading-relaxed">
