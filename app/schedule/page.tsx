@@ -16,7 +16,7 @@ const AVAIL_META: Record<AvailabilityStatus, { label: string; color: string }> =
 
 export default function SchedulePage() {
   const { roster } = useMember();
-  const sundays = getSundays(5);
+  const sundays = getSundays(10);
 
   return (
     <div>

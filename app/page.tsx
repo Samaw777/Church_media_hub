@@ -1,11 +1,20 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { ExternalLink } from "lucide-react";
+import { ExternalLink, Youtube } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { getSundays, isoDate, shortLabel } from "@/lib/dates";
 import { useMember } from "@/components/MemberProvider";
 import { Panel, StatCard } from "@/components/Ui";
+
+const YOUTUBE_URL = "https://www.youtube.com/@zefcchurchtv2560";
+
+function greeting() {
+  const hour = new Date().getHours();
+  if (hour < 12) return "Good morning";
+  if (hour < 18) return "Good afternoon";
+  return "Good evening";
+}
 
 export default function HomePage() {
   const { me, roster } = useMember();
@@ -49,11 +58,38 @@ export default function HomePage() {
   return (
     <div>
       <p className="text-xs uppercase tracking-wide text-muted mb-1" style={{ fontFamily: "var(--font-mono)" }}>
-        Welcome back
+        {greeting()}
       </p>
-      <h1 className="text-3xl mb-8" style={{ fontFamily: "var(--font-head)" }}>
+      <h1 className="text-3xl mb-6" style={{ fontFamily: "var(--font-head)" }}>
         Hey {me?.split(" ")[0]}.
       </h1>
+
+      <a
+        href={YOUTUBE_URL}
+        target="_blank"
+        rel="noreferrer"
+        className="group flex items-center justify-between gap-4 bg-panel border border-border hover:border-tally transition-colors px-6 py-5 mb-8"
+      >
+        <div className="flex items-center gap-4 min-w-0">
+          <div className="w-11 h-11 flex items-center justify-center bg-panel-2 border border-border text-tally shrink-0">
+            <Youtube size={20} />
+          </div>
+          <div className="min-w-0">
+            <p
+              className="text-xs uppercase tracking-wide text-muted-2 mb-0.5"
+              style={{ fontFamily: "var(--font-mono)" }}
+            >
+              Live & on demand
+            </p>
+            <p className="text-lg truncate" style={{ fontFamily: "var(--font-head)" }}>
+              Watch on YouTube
+            </p>
+          </div>
+        </div>
+        <span className="hidden sm:flex items-center gap-1.5 text-sm text-muted group-hover:text-tally transition-colors shrink-0">
+          Open channel <ExternalLink size={14} />
+        </span>
+      </a>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-8">
         <StatCard

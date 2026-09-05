@@ -10,7 +10,7 @@ import type { Assignment, Role } from "@/lib/types";
 
 export default function CalendarPage() {
   const { me, isAdmin, roster } = useMember();
-  const sundays = getSundays(5);
+  const sundays = getSundays(10);
   const sundayIsos = sundays.map(isoDate);
 
   const [roles, setRoles] = useState<Role[]>([]);

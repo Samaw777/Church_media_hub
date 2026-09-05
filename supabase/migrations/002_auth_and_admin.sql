@@ -87,7 +87,7 @@ create table if not exists assignments (
 
 insert into roles (name, position)
 select v.name, v.position
-from (values ('Camera', 0), ('Streaming / Wirecast', 1), ('ProPresenter / Slides', 2), ('Audio', 3), ('Host', 4)) as v(name, position)
+from (values ('Streaming / Wirecast', 0), ('ProPresenter / Slides', 1), ('Audio', 2)) as v(name, position)
 where not exists (select 1 from roles);
 
 -- ---------------------------------------------------------------------------
