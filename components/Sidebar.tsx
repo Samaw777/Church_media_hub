@@ -45,10 +45,10 @@ export function Sidebar() {
           </div>
           <button
             onClick={() => setOpen(!open)}
-            className="text-muted hover:text-text p-1 -mr-1"
+            className="flex items-center justify-center w-10 h-10 bg-tally text-[#160705] active:opacity-80 transition-opacity"
             aria-label={open ? "Close menu" : "Open menu"}
           >
-            {open ? <X size={20} /> : <Menu size={20} />}
+            {open ? <X size={22} /> : <Menu size={22} />}
           </button>
         </div>
 
