@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { ExternalLink, Youtube } from "lucide-react";
+import { ExternalLink, PlayCircle } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { getSundays, isoDate, shortLabel } from "@/lib/dates";
 import { useMember } from "@/components/MemberProvider";
@@ -72,7 +72,7 @@ export default function HomePage() {
       >
         <div className="flex items-center gap-4 min-w-0">
           <div className="w-11 h-11 flex items-center justify-center bg-panel-2 border border-border text-tally shrink-0">
-            <Youtube size={20} />
+            <PlayCircle size={20} />
           </div>
           <div className="min-w-0">
             <p
