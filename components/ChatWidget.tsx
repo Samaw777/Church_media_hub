@@ -52,7 +52,7 @@ export function ChatWidget() {
     return (
       <button
         onClick={() => setOpen(true)}
-        className="fixed bottom-5 right-5 w-12 h-12 rounded-full bg-tally text-[#160705] flex items-center justify-center shadow-lg hover:opacity-90 transition-opacity z-40"
+        className="fixed bottom-20 right-5 md:bottom-5 w-12 h-12 rounded-full bg-tally text-[#160705] flex items-center justify-center shadow-lg hover:opacity-90 transition-opacity z-40"
         title="Ask the help assistant"
       >
         <MessageCircle size={20} />
@@ -61,7 +61,7 @@ export function ChatWidget() {
   }
 
   return (
-    <div className="fixed bottom-5 right-5 w-[min(360px,calc(100vw-2.5rem))] h-[min(480px,calc(100vh-6rem))] bg-panel border border-border shadow-xl flex flex-col z-40">
+    <div className="fixed bottom-20 right-5 md:bottom-5 w-[min(360px,calc(100vw-2.5rem))] h-[min(480px,calc(100vh-9rem))] md:h-[min(480px,calc(100vh-6rem))] bg-panel border border-border shadow-xl flex flex-col z-40">
       <div className="flex items-center justify-between px-4 py-3 border-b border-border">
         <span className="text-sm" style={{ fontFamily: "var(--font-head)" }}>
           Help assistant
