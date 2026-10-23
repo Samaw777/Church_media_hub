@@ -56,11 +56,29 @@ export function AuthGate() {
 
     setBusy(true);
     if (mode === "sign-in") {
-      const { error } = await supabase.auth.signInWithPassword({
+      const { data, error } = await supabase.auth.signInWithPassword({
         email: email.trim(),
         password,
       });
-      if (error) setError(error.message);
+      if (error) {
+        setError(
+          error.message === "Failed to fetch"
+            ? "Couldn't reach the server. Check your connection and try again."
+            : error.message
+        );
+      } else if (data.user) {
+        // Signed in, but the app only opens once a team profile exists. Say so
+        // instead of leaving the person staring at the same sign-in screen.
+        const { data: member, error: memberError } = await supabase
+          .from("members")
+          .select("user_id")
+          .eq("user_id", data.user.id)
+          .maybeSingle();
+        if (!memberError && !member) {
+          setError("You're signed in, but there's no team profile for this account. Ask an admin to add you.");
+          await supabase.auth.signOut();
+        }
+      }
     } else {
       const { data, error } = await supabase.auth.signUp({
         email: email.trim(),
@@ -100,8 +118,17 @@ export function AuthGate() {
               : "Enter your email and we'll send you a link to set a new password."}
         </p>
 
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            if (mode === "reset") handleReset();
+            else handleSubmit();
+          }}
+        >
         {mode === "sign-up" && (
           <input
+            name="name"
+            autoComplete="name"
             autoFocus
             value={name}
             onChange={(e) => setName(e.target.value)}
@@ -111,19 +138,23 @@ export function AuthGate() {
         )}
         <input
           type="email"
+          name="email"
+          autoComplete={mode === "sign-up" ? "email" : "username"}
+          autoCapitalize="none"
+          autoCorrect="off"
           autoFocus={mode !== "sign-up"}
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          onKeyDown={(e) => e.key === "Enter" && mode === "reset" && handleReset()}
           placeholder="you@example.com"
           className="w-full bg-panel border border-border px-4 py-3 text-text placeholder-muted-2 outline-none focus:border-tally mb-3"
         />
         {mode !== "reset" && (
           <input
             type="password"
+            name="password"
+            autoComplete={mode === "sign-up" ? "new-password" : "current-password"}
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
             placeholder="Password"
             className="w-full bg-panel border border-border px-4 py-3 text-text placeholder-muted-2 outline-none focus:border-tally mb-3"
           />
@@ -131,6 +162,7 @@ export function AuthGate() {
 
         {mode === "sign-in" && (
           <button
+            type="button"
             onClick={() => switchMode("reset")}
             className="w-full text-right text-xs text-muted-2 hover:text-muted -mt-1 mb-3"
           >
@@ -142,7 +174,7 @@ export function AuthGate() {
         {notice && <p className="text-sm text-ok mb-3">{notice}</p>}
 
         <button
-          onClick={mode === "reset" ? handleReset : handleSubmit}
+          type="submit"
           disabled={busy}
           className="w-full py-3 bg-tally text-[#160705] font-medium flex items-center justify-center gap-2 hover:opacity-90 transition-opacity disabled:opacity-60"
         >
@@ -155,6 +187,7 @@ export function AuthGate() {
                 : "Send reset link"}{" "}
           <ArrowRight size={16} />
         </button>
+        </form>
 
         {mode === "reset" ? (
           <button onClick={() => switchMode("sign-in")} className="w-full text-center text-sm text-muted hover:text-text mt-4">
