@@ -69,11 +69,14 @@ export function AuthGate() {
       } else if (data.user) {
         // Signed in, but the app only opens once a team profile exists. Say so
         // instead of leaving the person staring at the same sign-in screen.
-        const { data: member, error: memberError } = await supabase
-          .from("members")
-          .select("user_id")
-          .eq("user_id", data.user.id)
-          .maybeSingle();
+        const findMember = () =>
+          supabase.from("members").select("user_id").eq("user_id", data.user.id).maybeSingle();
+        let { data: member, error: memberError } = await findMember();
+        if (!memberError && !member) {
+          // Try to repair a missing profile before giving up.
+          await supabase.rpc("ensure_my_member");
+          ({ data: member, error: memberError } = await findMember());
+        }
         if (!memberError && !member) {
           setError("You're signed in, but there's no team profile for this account. Ask an admin to add you.");
           await supabase.auth.signOut();

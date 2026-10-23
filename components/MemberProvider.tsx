@@ -31,12 +31,15 @@ export function MemberProvider({ children }: { children: React.ReactNode }) {
     // Retry on network errors (common right after opening from the home screen)
     // so a flaky first request doesn't bounce a signed-in person to the sign-in page.
     const cacheKey = `hub-profile:${userId}`;
+    const fetchProfile = () =>
+      supabase.from("members").select("name, role").eq("user_id", userId).maybeSingle();
     for (let attempt = 0; attempt < 4; attempt++) {
-      const { data, error } = await supabase
-        .from("members")
-        .select("name, role")
-        .eq("user_id", userId)
-        .maybeSingle();
+      let { data, error } = await fetchProfile();
+      if (!error && !data) {
+        // Signed in but no profile: ask the database to create or reclaim one.
+        await supabase.rpc("ensure_my_member");
+        ({ data, error } = await fetchProfile());
+      }
       if (!error) {
         setMe(data?.name ?? null);
         setRole((data?.role as MemberRole) ?? "member");

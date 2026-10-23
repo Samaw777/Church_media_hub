@@ -11,6 +11,8 @@ You'll also need a **GitHub** account to hold the code.
 4. Run `supabase/migrations/002_auth_and_admin.sql` the same way. This sets up real login, the
    admin role (auto-granted to the email hardcoded in that file), the assignment calendar, and
    screenshot storage.
+   Then run `supabase/migrations/003_fix_missing_profiles.sql`, which stops a new sign-up from
+   taking over someone else's profile and repairs any account left without one.
 5. Optional but recommended for a small team: **Authentication → Providers → Email**, turn off
    **Confirm email** so people can sign in immediately after signing up instead of waiting on a
    confirmation email.
