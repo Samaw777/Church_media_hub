@@ -28,17 +28,28 @@ export function MemberProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const loadProfile = useCallback(async (userId: string) => {
-    const { data } = await supabase
-      .from("members")
-      .select("name, role")
-      .eq("user_id", userId)
-      .maybeSingle();
-    setMe(data?.name ?? null);
-    setRole((data?.role as MemberRole) ?? "member");
+    // Retry on network errors (common right after opening from the home screen)
+    // so a flaky first request doesn't bounce a signed-in person to the sign-in page.
+    for (let attempt = 0; attempt < 4; attempt++) {
+      const { data, error } = await supabase
+        .from("members")
+        .select("name, role")
+        .eq("user_id", userId)
+        .maybeSingle();
+      if (!error) {
+        setMe(data?.name ?? null);
+        setRole((data?.role as MemberRole) ?? "member");
+        return;
+      }
+      await new Promise((r) => setTimeout(r, 500 * 2 ** attempt));
+    }
   }, []);
 
   useEffect(() => {
     let cancelled = false;
+
+    // Ask the browser not to evict saved data (including the login) under storage pressure.
+    navigator.storage?.persist?.().catch(() => {});
 
     supabase.auth.getSession().then(({ data }) => {
       if (cancelled) return;
@@ -50,8 +61,10 @@ export function MemberProvider({ children }: { children: React.ReactNode }) {
       }
     });
 
-    const { data: sub } = supabase.auth.onAuthStateChange((_event, newSession) => {
+    const { data: sub } = supabase.auth.onAuthStateChange((event, newSession) => {
       setSession(newSession);
+      // Token refreshes don't change who's signed in; no need to refetch the profile.
+      if (event === "TOKEN_REFRESHED") return;
       if (newSession) {
         loadProfile(newSession.user.id);
       } else {

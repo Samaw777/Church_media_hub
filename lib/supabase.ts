@@ -10,4 +10,13 @@ if (!url || !anonKey) {
   );
 }
 
-export const supabase = createClient(url, anonKey);
+// Keep people signed in across launches (including from a home-screen icon):
+// the session is stored on the device and refreshed automatically, so it only
+// ends when someone signs out.
+export const supabase = createClient(url, anonKey, {
+  auth: {
+    persistSession: true,
+    autoRefreshToken: true,
+    detectSessionInUrl: true,
+  },
+});
