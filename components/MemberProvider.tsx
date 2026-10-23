@@ -30,6 +30,7 @@ export function MemberProvider({ children }: { children: React.ReactNode }) {
   const loadProfile = useCallback(async (userId: string) => {
     // Retry on network errors (common right after opening from the home screen)
     // so a flaky first request doesn't bounce a signed-in person to the sign-in page.
+    const cacheKey = `hub-profile:${userId}`;
     for (let attempt = 0; attempt < 4; attempt++) {
       const { data, error } = await supabase
         .from("members")
@@ -39,10 +40,23 @@ export function MemberProvider({ children }: { children: React.ReactNode }) {
       if (!error) {
         setMe(data?.name ?? null);
         setRole((data?.role as MemberRole) ?? "member");
+        try {
+          if (data) localStorage.setItem(cacheKey, JSON.stringify(data));
+          else localStorage.removeItem(cacheKey);
+        } catch {}
         return;
       }
       await new Promise((r) => setTimeout(r, 500 * 2 ** attempt));
     }
+    // Still offline: fall back to the last profile seen on this device so a
+    // signed-in person isn't shown the sign-in page just because of bad signal.
+    try {
+      const cached = JSON.parse(localStorage.getItem(cacheKey) ?? "null");
+      if (cached?.name) {
+        setMe(cached.name);
+        setRole((cached.role as MemberRole) ?? "member");
+      }
+    } catch {}
   }, []);
 
   useEffect(() => {
