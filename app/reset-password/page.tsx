@@ -2,8 +2,9 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowRight, CircleDot } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { supabase } from "@/lib/supabase";
+import { Brand } from "@/components/Ui";
 
 export default function ResetPasswordPage() {
   const router = useRouter();
@@ -69,11 +70,8 @@ export default function ResetPasswordPage() {
   return (
     <div className="min-h-screen w-full flex items-center justify-center bg-bg px-6">
       <div className="w-full max-w-sm">
-        <div className="flex items-center gap-2 mb-6 justify-center">
-          <CircleDot size={18} className="text-tally" />
-          <span className="uppercase tracking-wide text-xs text-muted" style={{ fontFamily: "var(--font-mono)" }}>
-            Media Team Hub
-          </span>
+        <div className="flex justify-center mb-8">
+          <Brand size="lg" />
         </div>
 
         {done ? (
@@ -86,7 +84,7 @@ export default function ResetPasswordPage() {
             </p>
             <button
               onClick={() => router.push("/")}
-              className="w-full py-3 bg-tally text-[#160705] font-medium flex items-center justify-center gap-2 hover:opacity-90 transition-opacity"
+              className="btn btn-primary btn-lg w-full"
             >
               Continue <ArrowRight size={16} />
             </button>
@@ -105,7 +103,7 @@ export default function ResetPasswordPage() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="New password"
-              className="w-full bg-panel border border-border px-4 py-3 text-text placeholder-muted-2 outline-none focus:border-tally mb-3"
+              className="field field-lg mb-3"
             />
             <input
               type="password"
@@ -113,13 +111,13 @@ export default function ResetPasswordPage() {
               onChange={(e) => setConfirm(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
               placeholder="Confirm new password"
-              className="w-full bg-panel border border-border px-4 py-3 text-text placeholder-muted-2 outline-none focus:border-tally mb-3"
+              className="field field-lg mb-3"
             />
             {error && <p className="text-sm text-tally mb-3">{error}</p>}
             <button
               onClick={handleSubmit}
               disabled={busy}
-              className="w-full py-3 bg-tally text-[#160705] font-medium flex items-center justify-center gap-2 hover:opacity-90 transition-opacity disabled:opacity-60"
+              className="btn btn-primary btn-lg w-full"
             >
               {busy ? "Please wait…" : "Update password"} <ArrowRight size={16} />
             </button>
@@ -135,7 +133,7 @@ export default function ResetPasswordPage() {
             </p>
             <button
               onClick={() => router.push("/")}
-              className="w-full py-3 bg-panel-2 border border-border text-sm hover:border-muted"
+              className="btn btn-secondary btn-lg w-full"
             >
               Back to sign in
             </button>

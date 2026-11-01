@@ -32,7 +32,7 @@ export default function StreamSetupPage() {
     <div>
       <PageHeader eyebrow="Wirecast → YouTube" title="Live Stream Setup" />
 
-      <div className="bg-panel border border-border p-5 mb-6">
+      <div className="card p-5 mb-6">
         <SignalFlowDiagram />
       </div>
 
@@ -44,7 +44,7 @@ export default function StreamSetupPage() {
       <div className="space-y-8">
         {STEPS.map((group) => (
           <div key={group.group}>
-            <h2 className="text-sm uppercase tracking-wide text-muted mb-3" style={{ fontFamily: "var(--font-mono)" }}>
+            <h2 className="section-title mb-3">
               {group.group}
             </h2>
             <div className="space-y-3">
@@ -84,10 +84,9 @@ function StepCard({
   onSetImage: (url: string) => void;
 }) {
   return (
-    <div className="bg-panel border border-border p-5 flex gap-4">
+    <div className="card p-5 flex gap-4">
       <div
-        className="shrink-0 w-8 h-8 flex items-center justify-center border border-border text-sm text-muted"
-        style={{ fontFamily: "var(--font-mono)" }}
+        className="shrink-0 w-8 h-8 rounded-full flex items-center justify-center bg-panel-2 text-sm font-medium text-muted"
       >
         {n}
       </div>
@@ -102,7 +101,7 @@ function StepCard({
           <img
             src={image}
             alt={step.title}
-            className="max-w-full border border-border mb-3"
+            className="max-w-full rounded-lg border border-border mb-3"
             onError={(e) => ((e.currentTarget as HTMLImageElement).style.display = "none")}
           />
         )}
@@ -134,11 +133,10 @@ function SignalFlowDiagram() {
       {nodes.map((n, i) => (
         <div key={n} className="flex items-center gap-3">
           <div
-            className="px-4 py-3 border text-sm text-center"
+            className="px-4 py-2.5 rounded-lg border text-sm text-center"
             style={{
               borderColor: i === nodes.length - 1 ? "var(--tally)" : "var(--border)",
               color: i === nodes.length - 1 ? "var(--tally)" : "var(--text)",
-              fontFamily: "var(--font-mono)",
             }}
           >
             {n}

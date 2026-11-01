@@ -71,10 +71,10 @@ export default function TroubleshootingPage() {
     <div>
       <PageHeader eyebrow="Common problems & the log" title="Troubleshooting" />
 
-      <h2 className="text-sm uppercase tracking-wide text-muted mb-3" style={{ fontFamily: "var(--font-mono)" }}>
+      <h2 className="section-title mb-3">
         Quick fixes
       </h2>
-      <div className="border border-border mb-8">
+      <div className="rounded-xl border border-border overflow-hidden mb-8">
         {TROUBLESHOOTING.map((t, i) => (
           <div key={i} className="border-b last:border-b-0 border-border">
             <button
@@ -96,31 +96,31 @@ export default function TroubleshootingPage() {
       </div>
 
       <div className="flex items-center justify-between mb-3">
-        <h2 className="text-sm uppercase tracking-wide text-muted" style={{ fontFamily: "var(--font-mono)" }}>
+        <h2 className="section-title">
           Issue log
         </h2>
         <button
           onClick={() => setShowForm(!showForm)}
-          className="text-sm px-3 py-1.5 bg-tally text-[#160705] flex items-center gap-1.5"
+          className="btn btn-primary"
         >
           <Plus size={14} /> Log an issue
         </button>
       </div>
 
       {showForm && (
-        <div className="bg-panel border border-border p-5 mb-4">
+        <div className="card p-5 mb-4">
           <input
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             placeholder="What happened?"
-            className="w-full bg-bg border border-border px-3 py-2 text-sm outline-none focus:border-tally mb-3"
+            className="field w-full mb-3"
           />
           <textarea
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             placeholder="Details — what you tried, what fixed it (if anything)"
             rows={3}
-            className="w-full bg-bg border border-border px-3 py-2 text-sm outline-none focus:border-tally mb-3 resize-none"
+            className="field w-full mb-3 resize-none"
           />
           <div className="flex items-center justify-between mb-3">
             <div className="flex gap-2">
@@ -128,7 +128,7 @@ export default function TroubleshootingPage() {
                 <button
                   key={s}
                   onClick={() => setSeverity(s)}
-                  className="text-xs px-2.5 py-1 border capitalize"
+                  className="text-xs px-3 py-1 rounded-full border capitalize"
                   style={{
                     borderColor: severity === s ? "var(--tally)" : "var(--border)",
                     color: severity === s ? "var(--tally)" : "var(--muted)",
@@ -143,17 +143,17 @@ export default function TroubleshootingPage() {
           {screenshotUrl && (
             <div className="relative mb-3 inline-block">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={screenshotUrl} alt="Attached screenshot" className="max-h-40 border border-border" />
+              <img src={screenshotUrl} alt="Attached screenshot" className="max-h-40 rounded-lg border border-border" />
               <button
                 onClick={() => setScreenshotUrl("")}
-                className="absolute -top-2 -right-2 bg-panel border border-border text-muted-2 hover:text-tally"
+                className="absolute -top-2 -right-2 card text-muted-2 hover:text-tally"
               >
                 <X size={14} />
               </button>
             </div>
           )}
           <div className="flex justify-end">
-            <button onClick={submit} className="text-sm px-4 py-2 bg-tally text-[#160705]">
+            <button onClick={submit} className="btn btn-primary">
               Submit
             </button>
           </div>
@@ -165,15 +165,17 @@ export default function TroubleshootingPage() {
         {sorted.map((issue) => (
           <div
             key={issue.id}
-            className="bg-panel border border-border px-5 py-4 flex items-start gap-4"
-            style={{ borderLeft: `3px solid ${issue.status === "resolved" ? "var(--ok)" : "var(--tally)"}` }}
+            className="card px-5 py-4 flex items-start gap-4"
           >
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 flex-wrap mb-1">
+                <span
+                  className="w-2 h-2 rounded-full shrink-0"
+                  style={{ background: issue.status === "resolved" ? "var(--ok)" : "var(--tally)" }}
+                />
                 <span style={{ fontFamily: "var(--font-head)" }}>{issue.title}</span>
                 <span
-                  className="text-xs px-1.5 py-0.5 uppercase text-muted-2"
-                  style={{ fontFamily: "var(--font-mono)" }}
+                  className="text-xs px-2 py-0.5 rounded-full bg-panel-2 capitalize text-muted"
                 >
                   {issue.severity}
                 </span>
@@ -184,7 +186,7 @@ export default function TroubleshootingPage() {
                 <img
                   src={issue.screenshot_url}
                   alt={`Screenshot for ${issue.title}`}
-                  className="max-h-48 border border-border mb-2"
+                  className="max-h-48 rounded-lg border border-border mb-2"
                 />
               )}
               <p className="text-xs text-muted-2">
@@ -194,7 +196,7 @@ export default function TroubleshootingPage() {
             <div className="flex items-center gap-2 shrink-0">
               <button
                 onClick={() => toggleStatus(issue)}
-                className="text-xs px-2.5 py-1.5 border"
+                className="text-xs px-3 py-1.5 rounded-lg border"
                 style={{
                   borderColor: issue.status === "resolved" ? "var(--ok)" : "var(--border)",
                   color: issue.status === "resolved" ? "var(--ok)" : "var(--muted)",

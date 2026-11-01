@@ -83,7 +83,7 @@ export default function CalendarPage() {
           isAdmin ? (
             <button
               onClick={() => setManagingRoles(!managingRoles)}
-              className="text-sm flex items-center gap-1.5 text-muted hover:text-text"
+              className="btn btn-secondary"
             >
               {managingRoles ? "Done" : "Manage roles"}
             </button>
@@ -92,10 +92,10 @@ export default function CalendarPage() {
       />
 
       {managingRoles && (
-        <div className="bg-panel border border-border p-5 mb-6">
+        <div className="card p-5 mb-6">
           <div className="space-y-2 mb-3">
             {roles.map((r) => (
-              <div key={r.id} className="flex items-center justify-between text-sm bg-panel-2 border border-border px-3 py-2">
+              <div key={r.id} className="flex items-center justify-between text-sm bg-panel-2 border border-border rounded-lg px-3 py-2">
                 {r.name}
                 <button onClick={() => removeRole(r.id)} className="text-muted-2 hover:text-tally">
                   <Trash2 size={14} />
@@ -109,24 +109,24 @@ export default function CalendarPage() {
               onChange={(e) => setNewRole(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && addRole()}
               placeholder="New role, e.g. Lighting"
-              className="flex-1 bg-bg border border-border px-3 py-2 text-sm outline-none focus:border-tally"
+              className="field flex-1"
             />
-            <button onClick={addRole} className="text-sm px-3 py-2 bg-panel-2 border border-border flex items-center gap-1.5">
+            <button onClick={addRole} className="btn btn-secondary">
               <Plus size={14} /> Add
             </button>
           </div>
         </div>
       )}
 
-      <div className="overflow-x-auto border border-border">
+      <div className="overflow-x-auto rounded-xl border border-border">
         <table className="w-full text-sm border-collapse min-w-[640px]">
           <thead>
             <tr className="bg-panel-2">
-              <th className="text-left px-4 py-3 border-b border-border" style={{ fontFamily: "var(--font-mono)" }}>
+              <th className="text-left px-4 py-3 border-b border-border font-medium">
                 Sunday
               </th>
               {roles.map((r) => (
-                <th key={r.id} className="text-left px-4 py-3 border-b border-border font-normal text-muted" style={{ fontFamily: "var(--font-mono)" }}>
+                <th key={r.id} className="text-left px-4 py-3 border-b border-border font-medium text-muted whitespace-nowrap">
                   {r.name}
                 </th>
               ))}
@@ -144,12 +144,12 @@ export default function CalendarPage() {
                     const assigned = assignmentFor(sundayIso, r.id);
                     const isMe = assigned === me;
                     return (
-                      <td key={r.id} className="px-4 py-3 bg-panel">
+                      <td key={r.id} className="px-3 py-2.5 bg-panel min-w-[170px]">
                         {isAdmin ? (
                           <select
                             value={assigned}
                             onChange={(e) => assign(sundayIso, r.id, e.target.value)}
-                            className="bg-bg border border-border px-2 py-1.5 text-sm outline-none focus:border-tally w-full"
+                            className="field field-sm w-full"
                           >
                             <option value="">Unassigned</option>
                             {roster.map((n) => (

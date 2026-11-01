@@ -52,8 +52,9 @@ export function ChatWidget() {
     return (
       <button
         onClick={() => setOpen(true)}
-        className="fixed bottom-20 right-5 md:bottom-5 w-12 h-12 rounded-full bg-tally text-[#160705] flex items-center justify-center shadow-lg hover:opacity-90 transition-opacity z-40"
+        className="fixed bottom-[calc(5rem+env(safe-area-inset-bottom))] right-4 md:bottom-6 md:right-6 w-12 h-12 rounded-full bg-tally text-[#160705] flex items-center justify-center shadow-lg hover:opacity-90 transition-opacity z-40"
         title="Ask the help assistant"
+        aria-label="Ask the help assistant"
       >
         <MessageCircle size={20} />
       </button>
@@ -61,12 +62,12 @@ export function ChatWidget() {
   }
 
   return (
-    <div className="fixed bottom-20 right-5 md:bottom-5 w-[min(360px,calc(100vw-2.5rem))] h-[min(480px,calc(100vh-9rem))] md:h-[min(480px,calc(100vh-6rem))] bg-panel border border-border shadow-xl flex flex-col z-40">
+    <div className="fixed bottom-[calc(5rem+env(safe-area-inset-bottom))] right-4 md:bottom-6 md:right-6 w-[min(360px,calc(100vw-2rem))] h-[min(480px,calc(100vh-11rem))] md:h-[min(480px,calc(100vh-6rem))] card shadow-xl flex flex-col overflow-hidden z-40">
       <div className="flex items-center justify-between px-4 py-3 border-b border-border">
         <span className="text-sm" style={{ fontFamily: "var(--font-head)" }}>
           Help assistant
         </span>
-        <button onClick={() => setOpen(false)} className="text-muted-2 hover:text-text">
+        <button onClick={() => setOpen(false)} aria-label="Close" className="text-muted-2 hover:text-text">
           <X size={16} />
         </button>
       </div>
@@ -81,7 +82,7 @@ export function ChatWidget() {
         {messages.map((m, i) => (
           <div
             key={i}
-            className="text-sm px-3 py-2 max-w-[85%]"
+            className="text-sm px-3 py-2 rounded-xl max-w-[85%] w-fit"
             style={{
               marginLeft: m.role === "user" ? "auto" : 0,
               background: m.role === "user" ? "var(--tally)" : "var(--panel-2)",
@@ -101,9 +102,9 @@ export function ChatWidget() {
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && send()}
           placeholder="Ask a question…"
-          className="flex-1 bg-bg border border-border px-3 py-2 text-sm outline-none focus:border-tally"
+          className="field flex-1 min-w-0"
         />
-        <button onClick={send} disabled={busy} className="px-3 py-2 bg-tally text-[#160705] disabled:opacity-60">
+        <button onClick={send} disabled={busy} aria-label="Send" className="btn btn-primary">
           <Send size={15} />
         </button>
       </div>

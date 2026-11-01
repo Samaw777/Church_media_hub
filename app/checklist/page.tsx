@@ -101,7 +101,7 @@ export default function ChecklistPage() {
           isAdmin ? (
             <button
               onClick={() => setEditingItems(!editingItems)}
-              className="text-sm flex items-center gap-1.5 text-muted hover:text-text"
+              className="btn btn-secondary"
             >
               <Pencil size={14} /> {editingItems ? "Done editing" : "Edit list"}
             </button>
@@ -110,14 +110,14 @@ export default function ChecklistPage() {
       />
 
       <div className="mb-6">
-        <div className="h-2 bg-panel-2 border border-border">
+        <div className="h-2 rounded-full bg-panel-2 overflow-hidden">
           <div
-            className="h-full transition-all"
+            className="h-full rounded-full transition-all"
             style={{ width: `${pct}%`, background: pct === 100 ? "var(--ok)" : "var(--tally)" }}
           />
         </div>
-        <p className="text-xs text-muted mt-1.5" style={{ fontFamily: "var(--font-mono)" }}>
-          {doneCount} / {items.length} — {pct}%
+        <p className="text-xs text-muted mt-2">
+          {doneCount} of {items.length} done · {pct}%
         </p>
       </div>
 
@@ -126,16 +126,16 @@ export default function ChecklistPage() {
           {items.map((item) => {
             const s = state[item.id];
             return (
-              <div key={item.id} className="flex items-center gap-3 bg-panel border border-border px-4 py-3">
+              <div key={item.id} className="flex items-center gap-3 card px-4 py-3">
                 <button
                   onClick={() => toggle(item)}
-                  className="shrink-0 w-5 h-5 flex items-center justify-center border"
+                  className="shrink-0 w-6 h-6 rounded-md flex items-center justify-center border transition-colors"
                   style={{
-                    borderColor: s?.done ? "var(--ok)" : "var(--border)",
+                    borderColor: s?.done ? "var(--ok)" : "var(--muted-2)",
                     background: s?.done ? "var(--ok)" : "transparent",
                   }}
                 >
-                  {s?.done && <Check size={13} color="#0a1f16" />}
+                  {s?.done && <Check size={15} color="#0a1f16" />}
                 </button>
                 <span
                   className="flex-1 text-sm"
@@ -169,9 +169,9 @@ export default function ChecklistPage() {
             onChange={(e) => setNewItem(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && addItem()}
             placeholder="Add a checklist item"
-            className="flex-1 bg-panel border border-border px-3 py-2 text-sm outline-none focus:border-tally"
+            className="field flex-1"
           />
-          <button onClick={addItem} className="text-sm px-4 py-2 bg-panel-2 border border-border">
+          <button onClick={addItem} className="btn btn-secondary">
             Add
           </button>
         </div>

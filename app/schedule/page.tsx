@@ -90,8 +90,8 @@ function SundayCard({ date, roster }: { date: Date; roster: string[] }) {
 
   return (
     <div
-      className="bg-panel border border-border"
-      style={{ borderLeft: `3px solid ${today ? "var(--tally)" : "var(--border)"}` }}
+      className="card overflow-hidden"
+      style={{ borderColor: today ? "var(--tally)" : undefined }}
     >
       <div className="flex flex-wrap items-center justify-between gap-3 px-5 py-4 border-b border-border">
         <div className="flex items-center gap-3">
@@ -100,10 +100,10 @@ function SundayCard({ date, roster }: { date: Date; roster: string[] }) {
           </span>
           {today && (
             <span
-              className="text-xs px-2 py-0.5"
-              style={{ background: "var(--tally)", color: "#160705", fontFamily: "var(--font-mono)" }}
+              className="text-xs font-semibold px-2 py-0.5 rounded-full"
+              style={{ background: "var(--tally)", color: "#160705" }}
             >
-              TODAY
+              Today
             </span>
           )}
         </div>
@@ -111,7 +111,7 @@ function SundayCard({ date, roster }: { date: Date; roster: string[] }) {
           <button
             onClick={checkIn}
             disabled={iCheckedIn}
-            className="text-sm px-3 py-1.5 flex items-center gap-1.5 disabled:opacity-60"
+            className="btn"
             style={{
               background: iCheckedIn ? "var(--panel-2)" : "var(--ok)",
               color: iCheckedIn ? "var(--ok)" : "#0a1f16",
@@ -135,7 +135,7 @@ function SundayCard({ date, roster }: { date: Date; roster: string[] }) {
               <button
                 key={v}
                 onClick={() => setMyAvailability(v)}
-                className="text-sm px-3 py-1.5 border transition-colors"
+                className="text-sm px-3.5 py-1.5 rounded-full border transition-colors"
                 style={{
                   borderColor: availability[me] === v ? AVAIL_META[v].color : "var(--border)",
                   color: availability[me] === v ? AVAIL_META[v].color : "var(--muted)",

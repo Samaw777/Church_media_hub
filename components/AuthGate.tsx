@@ -1,8 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { ArrowRight, CircleDot } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { supabase } from "@/lib/supabase";
+import { Brand } from "./Ui";
 
 type Mode = "sign-in" | "sign-up" | "reset";
 
@@ -101,16 +102,10 @@ export function AuthGate() {
   return (
     <div className="min-h-screen w-full flex items-center justify-center bg-bg px-6">
       <div className="w-full max-w-sm">
-        <div className="flex items-center gap-2 mb-6 justify-center">
-          <CircleDot size={18} className="text-tally" />
-          <span
-            className="uppercase tracking-wide text-xs text-muted"
-            style={{ fontFamily: "var(--font-mono)" }}
-          >
-            Media Team Hub
-          </span>
+        <div className="flex justify-center mb-8">
+          <Brand size="lg" />
         </div>
-        <h1 className="text-2xl mb-2 text-center" style={{ fontFamily: "var(--font-head)" }}>
+        <h1 className="text-3xl mb-2 text-center" style={{ fontFamily: "var(--font-head)" }}>
           {mode === "sign-in" ? "Sign in" : mode === "sign-up" ? "Create your account" : "Reset password"}
         </h1>
         <p className="text-sm text-muted mb-5 leading-relaxed text-center">
@@ -136,7 +131,7 @@ export function AuthGate() {
             value={name}
             onChange={(e) => setName(e.target.value)}
             placeholder="Your name, e.g. Jordan"
-            className="w-full bg-panel border border-border px-4 py-3 text-text placeholder-muted-2 outline-none focus:border-tally mb-3"
+            className="field field-lg mb-3"
           />
         )}
         <input
@@ -149,7 +144,7 @@ export function AuthGate() {
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           placeholder="you@example.com"
-          className="w-full bg-panel border border-border px-4 py-3 text-text placeholder-muted-2 outline-none focus:border-tally mb-3"
+          className="field field-lg mb-3"
         />
         {mode !== "reset" && (
           <input
@@ -159,7 +154,7 @@ export function AuthGate() {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             placeholder="Password"
-            className="w-full bg-panel border border-border px-4 py-3 text-text placeholder-muted-2 outline-none focus:border-tally mb-3"
+            className="field field-lg mb-3"
           />
         )}
 
@@ -179,7 +174,7 @@ export function AuthGate() {
         <button
           type="submit"
           disabled={busy}
-          className="w-full py-3 bg-tally text-[#160705] font-medium flex items-center justify-center gap-2 hover:opacity-90 transition-opacity disabled:opacity-60"
+          className="btn btn-primary btn-lg w-full"
         >
           {busy
             ? "Please wait…"

@@ -2,11 +2,11 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { ExternalLink, PlayCircle } from "lucide-react";
+import { ArrowRight, ExternalLink, PlayCircle } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { getSundays, isoDate, shortLabel } from "@/lib/dates";
 import { useMember } from "@/components/MemberProvider";
-import { Panel, StatCard } from "@/components/Ui";
+import { Avatar, Panel, StatCard } from "@/components/Ui";
 
 const YOUTUBE_URL = "https://www.youtube.com/@zefcchurchtv2560";
 
@@ -32,6 +32,15 @@ function encouragementOfTheDay() {
   const start = new Date(new Date().getFullYear(), 0, 0);
   const dayOfYear = Math.floor((Date.now() - start.getTime()) / 86400000);
   return ENCOURAGEMENTS[dayOfYear % ENCOURAGEMENTS.length];
+}
+
+function countdownLabel(sunday: Date) {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const days = Math.round((sunday.getTime() - today.getTime()) / 86400000);
+  if (days === 0) return "Today";
+  if (days === 1) return "Tomorrow";
+  return `In ${days} days`;
 }
 
 export default function HomePage() {
@@ -118,56 +127,69 @@ export default function HomePage() {
     };
   }, [me]);
 
+  const myRoles = lineup.filter((l) => l.name === me).map((l) => l.role);
+  const allDone = doneCount === totalItems && totalItems > 0;
+  const pct = totalItems ? Math.round((doneCount / totalItems) * 100) : 0;
+
   return (
     <div>
-      <div className="flex items-center justify-between gap-3 mb-1">
-        <p className="text-xs uppercase tracking-wide text-muted" style={{ fontFamily: "var(--font-mono)" }}>
-          {greeting()}
-        </p>
-        <span
-          className="flex items-center gap-1.5 text-xs text-muted-2 shrink-0"
-          style={{ fontFamily: "var(--font-mono)" }}
-        >
+      <div className="flex items-end justify-between gap-3 mb-6">
+        <div className="min-w-0">
+          <p className="eyebrow mb-1">{greeting()}</p>
+          <h1 className="text-3xl truncate" style={{ fontFamily: "var(--font-head)" }}>
+            Hey {me?.split(" ")[0]}.
+          </h1>
+        </div>
+        <span className="flex items-center gap-1.5 text-xs text-muted shrink-0 pb-1">
           <span className="w-1.5 h-1.5 rounded-full bg-ok inline-block" />
-          {onlineCount} online now
+          {onlineCount} online
         </span>
       </div>
-      <h1 className="text-3xl mb-6" style={{ fontFamily: "var(--font-head)" }}>
-        Hey {me?.split(" ")[0]}.
-      </h1>
 
-      <a
-        href={YOUTUBE_URL}
-        target="_blank"
-        rel="noreferrer"
-        className="group flex items-center justify-between gap-4 bg-panel border border-border hover:border-tally transition-colors px-6 py-5 mb-8"
-      >
-        <div className="flex items-center gap-4 min-w-0">
-          <div className="w-11 h-11 flex items-center justify-center bg-panel-2 border border-border text-tally shrink-0">
-            <PlayCircle size={20} />
-          </div>
+      <div className="card p-6 md:p-8 mb-3">
+        <div className="flex flex-wrap items-start justify-between gap-6">
           <div className="min-w-0">
-            <p
-              className="text-xs uppercase tracking-wide text-muted-2 mb-0.5"
-              style={{ fontFamily: "var(--font-mono)" }}
-            >
-              Live & on demand
+            <p className="eyebrow mb-2">This Sunday · {countdownLabel(thisSunday)}</p>
+            <p className="text-4xl mb-2" style={{ fontFamily: "var(--font-head)" }}>
+              {shortLabel(thisSunday)}
             </p>
-            <p className="text-lg truncate" style={{ fontFamily: "var(--font-head)" }}>
-              Watch on YouTube
+            <p className="text-sm text-muted">
+              {myRoles.length > 0 ? (
+                <>
+                  You&apos;re on <span className="text-tally font-medium">{myRoles.join(" & ")}</span>
+                </>
+              ) : (
+                "You're not assigned to a role yet"
+              )}
             </p>
           </div>
+          <a href={YOUTUBE_URL} target="_blank" rel="noreferrer" className="btn btn-secondary shrink-0">
+            <PlayCircle size={15} className="text-tally" /> Watch on YouTube <ExternalLink size={13} className="text-muted-2" />
+          </a>
         </div>
-        <span className="hidden sm:flex items-center gap-1.5 text-sm text-muted group-hover:text-tally transition-colors shrink-0">
-          Open channel <ExternalLink size={14} />
-        </span>
-      </a>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-8">
+        <Link href="/checklist" className="group block mt-6 pt-5 border-t border-border">
+          <div className="flex items-center justify-between gap-3 mb-2 text-sm">
+            <span>Sunday checklist</span>
+            <span className="text-muted flex items-center gap-1.5">
+              {loading ? "—" : allDone ? "All done" : `${doneCount} of ${totalItems}`}
+              <ArrowRight size={14} className="group-hover:translate-x-0.5 transition-transform" />
+            </span>
+          </div>
+          <div className="h-1.5 rounded-full bg-panel-2 overflow-hidden">
+            <div
+              className="h-full rounded-full transition-all"
+              style={{ width: `${pct}%`, background: allDone ? "var(--ok)" : "var(--tally)" }}
+            />
+          </div>
+        </Link>
+      </div>
+
+      <div className="grid grid-cols-3 gap-3 mb-3">
         <StatCard
-          label="This Sunday"
-          value={shortLabel(thisSunday)}
-          sub={`${yesCount} of ${roster.length} available`}
+          label="Available"
+          value={`${yesCount}/${roster.length}`}
+          sub="said they're in"
           tally="var(--ok)"
           href="/schedule"
           loading={loading}
@@ -181,17 +203,9 @@ export default function HomePage() {
           loading={loading}
         />
         <StatCard
-          label="Checklist"
-          value={`${doneCount}/${totalItems}`}
-          sub={doneCount === totalItems && totalItems > 0 ? "all done 🎉" : "steps done"}
-          tally={doneCount === totalItems && totalItems > 0 ? "var(--ok)" : "var(--warn)"}
-          href="/checklist"
-          loading={loading}
-        />
-        <StatCard
-          label="Open issues"
+          label="Issues"
           value={`${openIssues}`}
-          sub="need attention"
+          sub={openIssues > 0 ? "need attention" : "all clear"}
           tally={openIssues > 0 ? "var(--tally)" : "var(--ok)"}
           href="/troubleshooting"
           loading={loading}
@@ -200,9 +214,9 @@ export default function HomePage() {
 
       <div className="mb-3">
         <Panel
-          title={`This Sunday's Lineup — ${shortLabel(thisSunday)}`}
+          title="This Sunday's lineup"
           action={
-            <Link href="/calendar" className="text-xs text-muted hover:text-text">
+            <Link href="/calendar" className="text-xs text-muted hover:text-text shrink-0">
               Full calendar →
             </Link>
           }
@@ -210,20 +224,20 @@ export default function HomePage() {
           {lineup.length === 0 ? (
             <p className="text-sm text-muted-2">No roles set up yet — an admin can add some on the Calendar page.</p>
           ) : (
-            <div className="flex flex-wrap gap-2">
+            <div className="grid sm:grid-cols-2 gap-x-6 gap-y-3">
               {lineup.map((l) => (
-                <div key={l.role} className="flex items-center gap-2 px-3 py-2 bg-panel-2 border border-border text-sm">
-                  <span className="text-muted-2 text-xs uppercase" style={{ fontFamily: "var(--font-mono)" }}>
-                    {l.role}
-                  </span>
-                  <span
-                    style={{
-                      color: l.name === me ? "var(--tally)" : l.name ? "var(--text)" : "var(--muted-2)",
-                      fontWeight: l.name === me ? 600 : 400,
-                    }}
-                  >
-                    {l.name ?? "Open"}
-                  </span>
+                <div key={l.role} className="flex items-center gap-3 min-w-0">
+                  {l.name ? (
+                    <Avatar name={l.name} highlight={l.name === me} />
+                  ) : (
+                    <span className="w-7 h-7 rounded-full border border-dashed border-border shrink-0" />
+                  )}
+                  <div className="min-w-0">
+                    <p className="text-sm truncate" style={{ color: l.name ? "var(--text)" : "var(--muted-2)" }}>
+                      {l.name ?? "Open"}
+                    </p>
+                    <p className="text-xs text-muted-2 truncate">{l.role}</p>
+                  </div>
                 </div>
               ))}
             </div>
@@ -237,9 +251,11 @@ export default function HomePage() {
             {roster.map((n) => (
               <span
                 key={n}
-                className="px-3 py-1.5 text-sm bg-panel-2 border border-border"
+                title={n}
+                className="flex items-center gap-2 text-sm"
                 style={{ color: n === me ? "var(--text)" : "var(--muted)" }}
               >
+                <Avatar name={n} highlight={n === me} />
                 {n}
               </span>
             ))}
@@ -247,7 +263,9 @@ export default function HomePage() {
           </div>
         </Panel>
         <Panel title="Word for the team">
-          <p className="text-sm text-muted leading-relaxed italic">{encouragementOfTheDay()}</p>
+          <p className="text-sm text-muted leading-relaxed" style={{ fontFamily: "var(--font-head)" }}>
+            {encouragementOfTheDay()}
+          </p>
         </Panel>
         <Panel title="Group chat">
           <p className="text-sm text-muted mb-3 leading-relaxed">
@@ -279,9 +297,9 @@ function ChatLinkEditor({ initial }: { initial: string }) {
           value={draft}
           onChange={(e) => setDraft(e.target.value)}
           placeholder="https://chat.whatsapp.com/..."
-          className="flex-1 bg-bg border border-border px-3 py-2 text-sm outline-none focus:border-tally"
+          className="field flex-1 min-w-0"
         />
-        <button onClick={save} className="px-3 py-2 text-sm bg-panel-2 border border-border hover:border-muted">
+        <button onClick={save} className="btn btn-secondary">
           Save
         </button>
       </div>
