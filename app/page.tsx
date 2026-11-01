@@ -2,11 +2,12 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { ArrowRight, ExternalLink, PlayCircle } from "lucide-react";
+import { AlertTriangle, ExternalLink, MapPin, PlayCircle, Quote, ShieldCheck, Users } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { getSundays, isoDate, shortLabel } from "@/lib/dates";
 import { useMember } from "@/components/MemberProvider";
 import { Avatar, Panel, StatCard } from "@/components/Ui";
+import { ProgressRing, SignalRings, StageLights } from "@/components/Graphics";
 
 const YOUTUBE_URL = "https://www.youtube.com/@zefcchurchtv2560";
 
@@ -146,14 +147,19 @@ export default function HomePage() {
         </span>
       </div>
 
-      <div className="card p-6 md:p-8 mb-3">
-        <div className="flex flex-wrap items-start justify-between gap-6">
+      <div className="card relative overflow-hidden p-6 md:p-8 mb-3">
+        <StageLights className="absolute inset-x-0 top-0 w-full h-full" />
+        <SignalRings className="absolute top-0 right-0 h-72 w-72" />
+        <div className="relative flex items-center justify-between gap-4">
           <div className="min-w-0">
-            <p className="eyebrow mb-2">This Sunday · {countdownLabel(thisSunday)}</p>
-            <p className="text-4xl mb-2" style={{ fontFamily: "var(--font-head)" }}>
+            <p className="eyebrow mb-2 flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-tally tally-dot" />
+              This Sunday · {countdownLabel(thisSunday)}
+            </p>
+            <p className="text-4xl md:text-5xl mb-2" style={{ fontFamily: "var(--font-head)" }}>
               {shortLabel(thisSunday)}
             </p>
-            <p className="text-sm text-muted">
+            <p className="text-sm text-muted mb-5">
               {myRoles.length > 0 ? (
                 <>
                   You&apos;re on <span className="text-tally font-medium">{myRoles.join(" & ")}</span>
@@ -162,27 +168,18 @@ export default function HomePage() {
                 "You're not assigned to a role yet"
               )}
             </p>
+            <a href={YOUTUBE_URL} target="_blank" rel="noreferrer" className="btn btn-secondary whitespace-nowrap">
+              <PlayCircle size={15} className="text-tally" /> Watch on YouTube{" "}
+              <ExternalLink size={13} className="text-muted-2 hidden sm:inline" />
+            </a>
           </div>
-          <a href={YOUTUBE_URL} target="_blank" rel="noreferrer" className="btn btn-secondary shrink-0">
-            <PlayCircle size={15} className="text-tally" /> Watch on YouTube <ExternalLink size={13} className="text-muted-2" />
-          </a>
-        </div>
-
-        <Link href="/checklist" className="group block mt-6 pt-5 border-t border-border">
-          <div className="flex items-center justify-between gap-3 mb-2 text-sm">
-            <span>Sunday checklist</span>
-            <span className="text-muted flex items-center gap-1.5">
-              {loading ? "—" : allDone ? "All done" : `${doneCount} of ${totalItems}`}
-              <ArrowRight size={14} className="group-hover:translate-x-0.5 transition-transform" />
+          <Link href="/checklist" title="Open the Sunday checklist" className="flex flex-col items-center gap-2 shrink-0">
+            <ProgressRing pct={loading ? 0 : pct} size={92} />
+            <span className="text-xs text-muted whitespace-nowrap">
+              {loading ? "Checklist" : allDone ? "All done" : `${doneCount} of ${totalItems} done`}
             </span>
-          </div>
-          <div className="h-1.5 rounded-full bg-panel-2 overflow-hidden">
-            <div
-              className="h-full rounded-full transition-all"
-              style={{ width: `${pct}%`, background: allDone ? "var(--ok)" : "var(--tally)" }}
-            />
-          </div>
-        </Link>
+          </Link>
+        </div>
       </div>
 
       <div className="grid grid-cols-3 gap-3 mb-3">
@@ -193,6 +190,7 @@ export default function HomePage() {
           tally="var(--ok)"
           href="/schedule"
           loading={loading}
+          icon={Users}
         />
         <StatCard
           label="Checked in"
@@ -201,6 +199,7 @@ export default function HomePage() {
           tally="var(--ok)"
           href="/schedule"
           loading={loading}
+          icon={MapPin}
         />
         <StatCard
           label="Issues"
@@ -209,6 +208,7 @@ export default function HomePage() {
           tally={openIssues > 0 ? "var(--tally)" : "var(--ok)"}
           href="/troubleshooting"
           loading={loading}
+          icon={openIssues > 0 ? AlertTriangle : ShieldCheck}
         />
       </div>
 
@@ -263,6 +263,7 @@ export default function HomePage() {
           </div>
         </Panel>
         <Panel title="Word for the team">
+          <Quote size={22} className="text-tally mb-2" />
           <p className="text-sm text-muted leading-relaxed" style={{ fontFamily: "var(--font-head)" }}>
             {encouragementOfTheDay()}
           </p>

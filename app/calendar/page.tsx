@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Plus, Trash2 } from "lucide-react";
+import { CalendarDays, Plus, Trash2 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { getSundays, isoDate, shortLabel } from "@/lib/dates";
 import { useMember } from "@/components/MemberProvider";
@@ -79,6 +79,7 @@ export default function CalendarPage() {
       <PageHeader
         eyebrow="Who's assigned where"
         title="Calendar"
+        icon={CalendarDays}
         right={
           isAdmin ? (
             <button

@@ -25,7 +25,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <div className="w-full min-h-screen bg-bg text-text flex flex-col md:flex-row">
+    <div className="w-full min-h-screen text-text flex flex-col md:flex-row">
       <Sidebar />
       <main className="flex-1 min-w-0 p-4 pb-28 md:p-10">
         <div className="max-w-5xl mx-auto">{children}</div>

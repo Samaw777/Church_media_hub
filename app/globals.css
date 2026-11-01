@@ -43,6 +43,11 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
+body {
+  background-image: radial-gradient(60rem 30rem at 100% -10%, rgb(228 72 60 / 0.09), transparent 70%);
+  background-repeat: no-repeat;
+}
+
 ::selection {
   background: var(--tally);
   color: #160705;
@@ -163,8 +168,73 @@ select {
   animation: pulse-dot 2s ease-in-out infinite;
 }
 
+@keyframes ring-pulse {
+  from {
+    transform: scale(1);
+    opacity: 0.6;
+  }
+  to {
+    transform: scale(5.5);
+    opacity: 0;
+  }
+}
+.ring-pulse {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: ring-pulse 5s ease-out infinite;
+}
+
+@keyframes beam-sway {
+  from {
+    transform: rotate(-3deg);
+  }
+  to {
+    transform: rotate(3deg);
+  }
+}
+.beam {
+  transform-box: fill-box;
+  transform-origin: top center;
+  animation: beam-sway 9s ease-in-out infinite alternate;
+}
+.beam-alt {
+  animation-delay: -4s;
+  animation-direction: alternate-reverse;
+}
+
+@keyframes flow {
+  to {
+    background-position: 0 16px;
+  }
+}
+@keyframes flow-x {
+  to {
+    background-position: 16px 0;
+  }
+}
+.flow-line {
+  width: 2px;
+  height: 22px;
+  align-self: center;
+  background: linear-gradient(to bottom, var(--tally) 50%, transparent 50%) 0 0 / 100% 16px;
+  animation: flow 1s linear infinite;
+}
+@media (min-width: 640px) {
+  .flow-line {
+    width: auto;
+    height: 2px;
+    flex: 1;
+    min-width: 16px;
+    background: linear-gradient(to right, var(--tally) 50%, transparent 50%) 0 0 / 16px 100%;
+    animation-name: flow-x;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
-  .tally-dot {
+  .tally-dot,
+  .ring-pulse,
+  .beam,
+  .flow-line {
     animation: none;
   }
 }

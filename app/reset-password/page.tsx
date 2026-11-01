@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { ArrowRight } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { Brand } from "@/components/Ui";
+import { StageLights } from "@/components/Graphics";
 
 export default function ResetPasswordPage() {
   const router = useRouter();
@@ -68,8 +69,9 @@ export default function ResetPasswordPage() {
   }
 
   return (
-    <div className="min-h-screen w-full flex items-center justify-center bg-bg px-6">
-      <div className="w-full max-w-sm">
+    <div className="relative min-h-screen w-full flex items-center justify-center overflow-hidden bg-bg px-6">
+      <StageLights className="absolute inset-x-0 top-0 w-full h-[70vh]" />
+      <div className="relative w-full max-w-sm">
         <div className="flex justify-center mb-8">
           <Brand size="lg" />
         </div>

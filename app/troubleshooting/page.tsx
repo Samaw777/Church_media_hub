@@ -1,11 +1,12 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { AlertTriangle, ChevronDown, Plus, Trash2, X } from "lucide-react";
+import { AlertTriangle, ChevronDown, Plus, ShieldCheck, Trash2, Wrench, X } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { timeLabel } from "@/lib/dates";
 import { useMember } from "@/components/MemberProvider";
 import { PageHeader } from "@/components/Ui";
+import { IconTile } from "@/components/Graphics";
 import { ScreenshotUpload } from "@/components/ScreenshotUpload";
 import type { Issue } from "@/lib/types";
 import { TROUBLESHOOTING } from "@/lib/knowledge";
@@ -69,7 +70,7 @@ export default function TroubleshootingPage() {
 
   return (
     <div>
-      <PageHeader eyebrow="Common problems & the log" title="Troubleshooting" />
+      <PageHeader eyebrow="Common problems & the log" title="Troubleshooting" icon={Wrench} />
 
       <h2 className="section-title mb-3">
         Quick fixes
@@ -161,7 +162,12 @@ export default function TroubleshootingPage() {
       )}
 
       <div className="space-y-2">
-        {sorted.length === 0 && <p className="text-sm text-muted-2">No issues logged yet.</p>}
+        {sorted.length === 0 && (
+          <div className="card flex flex-col items-center gap-3 p-8 text-center">
+            <IconTile icon={ShieldCheck} color="var(--ok)" />
+            <p className="text-sm text-muted">All clear — no issues logged yet.</p>
+          </div>
+        )}
         {sorted.map((issue) => (
           <div
             key={issue.id}

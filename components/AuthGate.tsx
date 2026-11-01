@@ -4,6 +4,7 @@ import { useState } from "react";
 import { ArrowRight } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { Brand } from "./Ui";
+import { CameraArt, StageLights } from "./Graphics";
 
 type Mode = "sign-in" | "sign-up" | "reset";
 
@@ -100,9 +101,11 @@ export function AuthGate() {
   }
 
   return (
-    <div className="min-h-screen w-full flex items-center justify-center bg-bg px-6">
-      <div className="w-full max-w-sm">
-        <div className="flex justify-center mb-8">
+    <div className="relative min-h-screen w-full flex items-center justify-center overflow-hidden bg-bg px-6">
+      <StageLights className="absolute inset-x-0 top-0 w-full h-[70vh]" />
+      <div className="relative w-full max-w-sm">
+        <CameraArt className="w-40 mx-auto mb-3" />
+        <div className="flex justify-center mb-6">
           <Brand size="lg" />
         </div>
         <h1 className="text-3xl mb-2 text-center" style={{ fontFamily: "var(--font-head)" }}>

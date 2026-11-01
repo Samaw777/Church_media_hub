@@ -1,11 +1,12 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Check, Pencil, Trash2 } from "lucide-react";
+import { Check, ListChecks, Pencil, Trash2 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { getSundays, isoDate, shortLabel, timeLabel } from "@/lib/dates";
 import { useMember } from "@/components/MemberProvider";
 import { PageHeader } from "@/components/Ui";
+import { ProgressRing } from "@/components/Graphics";
 import type { ChecklistItem, ChecklistState } from "@/lib/types";
 import { DEFAULT_CHECKLIST_ITEMS as DEFAULT_ITEMS } from "@/lib/knowledge";
 
@@ -97,6 +98,7 @@ export default function ChecklistPage() {
       <PageHeader
         eyebrow={shortLabel(sunday)}
         title="Sunday Checklist"
+        icon={ListChecks}
         right={
           isAdmin ? (
             <button
@@ -109,16 +111,16 @@ export default function ChecklistPage() {
         }
       />
 
-      <div className="mb-6">
-        <div className="h-2 rounded-full bg-panel-2 overflow-hidden">
-          <div
-            className="h-full rounded-full transition-all"
-            style={{ width: `${pct}%`, background: pct === 100 ? "var(--ok)" : "var(--tally)" }}
-          />
+      <div className="card flex items-center gap-5 p-5 mb-6">
+        <ProgressRing pct={pct} size={84} />
+        <div className="min-w-0">
+          <p className="text-lg" style={{ fontFamily: "var(--font-head)" }}>
+            {pct === 100 ? "Ready to go live" : "Getting ready"}
+          </p>
+          <p className="text-sm text-muted">
+            {doneCount} of {items.length} steps done
+          </p>
         </div>
-        <p className="text-xs text-muted mt-2">
-          {doneCount} of {items.length} done · {pct}%
-        </p>
       </div>
 
       {!loading && (

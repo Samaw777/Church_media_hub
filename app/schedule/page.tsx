@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Check } from "lucide-react";
+import { Calendar, Check } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { getSundays, isoDate, isToday, shortLabel, timeLabel } from "@/lib/dates";
 import { useMember } from "@/components/MemberProvider";
@@ -20,7 +20,7 @@ export default function SchedulePage() {
 
   return (
     <div>
-      <PageHeader eyebrow="Availability & check-in" title="Schedule" />
+      <PageHeader eyebrow="Availability & check-in" title="Schedule" icon={Calendar} />
       <div className="space-y-4">
         {sundays.map((d) => (
           <SundayCard key={isoDate(d)} date={d} roster={roster} />
@@ -91,7 +91,10 @@ function SundayCard({ date, roster }: { date: Date; roster: string[] }) {
   return (
     <div
       className="card overflow-hidden"
-      style={{ borderColor: today ? "var(--tally)" : undefined }}
+      style={{
+        borderColor: today ? "var(--tally)" : undefined,
+        boxShadow: today ? "0 0 32px rgb(228 72 60 / 0.14)" : undefined,
+      }}
     >
       <div className="flex flex-wrap items-center justify-between gap-3 px-5 py-4 border-b border-border">
         <div className="flex items-center gap-3">

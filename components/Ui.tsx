@@ -1,6 +1,16 @@
 "use client";
 
 import Link from "next/link";
+import type { LucideIcon } from "lucide-react";
+import { IconTile, SignalRings } from "./Graphics";
+
+const AVATAR_COLORS = ["#6f9df2", "#3fb88a", "#e3a83d", "#b98ae0", "#4fb6c9", "#e58a6d"];
+
+function avatarColor(name: string) {
+  let hash = 0;
+  for (const ch of name) hash = (hash * 31 + ch.charCodeAt(0)) >>> 0;
+  return AVATAR_COLORS[hash % AVATAR_COLORS.length];
+}
 
 export function Brand({ size = "md" }: { size?: "md" | "lg" }) {
   const ring = size === "lg" ? "w-7 h-7" : "w-5 h-5";
@@ -18,13 +28,13 @@ export function Brand({ size = "md" }: { size?: "md" | "lg" }) {
 }
 
 export function Avatar({ name, highlight }: { name: string; highlight?: boolean }) {
+  const color = avatarColor(name);
   return (
     <span
       className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-semibold shrink-0"
       style={{
-        background: highlight ? "var(--tally)" : "var(--panel-2)",
-        color: highlight ? "#160705" : "var(--muted)",
-        border: highlight ? "none" : "1px solid var(--border)",
+        background: highlight ? "var(--tally)" : `color-mix(in srgb, ${color} 20%, transparent)`,
+        color: highlight ? "#160705" : color,
       }}
     >
       {name.trim().charAt(0).toUpperCase()}
@@ -36,20 +46,28 @@ export function PageHeader({
   eyebrow,
   title,
   right,
+  icon,
 }: {
   eyebrow: string;
   title: string;
   right?: React.ReactNode;
+  icon?: LucideIcon;
 }) {
   return (
-    <div className="flex items-end justify-between mb-6 flex-wrap gap-3">
-      <div>
-        <p className="eyebrow mb-1">{eyebrow}</p>
-        <h1 className="text-3xl" style={{ fontFamily: "var(--font-head)" }}>
-          {title}
-        </h1>
+    <div className="card relative overflow-hidden mb-6 p-5 md:p-6">
+      <SignalRings className="absolute top-0 right-0 h-56 w-56" />
+      <div className="relative flex items-center justify-between flex-wrap gap-3">
+        <div className="flex items-center gap-4 min-w-0">
+          {icon && <IconTile icon={icon} />}
+          <div className="min-w-0">
+            <p className="eyebrow mb-1">{eyebrow}</p>
+            <h1 className="text-3xl" style={{ fontFamily: "var(--font-head)" }}>
+              {title}
+            </h1>
+          </div>
+        </div>
+        {right}
       </div>
-      {right}
     </div>
   );
 }
@@ -81,6 +99,7 @@ export function StatCard({
   tally,
   href,
   loading,
+  icon: Icon,
 }: {
   label: string;
   value: string;
@@ -88,11 +107,12 @@ export function StatCard({
   tally: string;
   href: string;
   loading?: boolean;
+  icon: LucideIcon;
 }) {
   return (
     <Link href={href} className="card block p-3 sm:p-4 min-w-0 hover:border-muted-2 transition-colors">
-      <p className="eyebrow flex items-center gap-1.5 mb-2">
-        <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: tally }} />
+      <p className="eyebrow flex items-center gap-1 sm:gap-1.5 mb-2">
+        <Icon size={12} className="shrink-0" style={{ color: tally }} />
         <span className="whitespace-nowrap">{label}</span>
       </p>
       <p className="text-2xl mb-1" style={{ fontFamily: "var(--font-head)" }}>

@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { ArrowRight, Trash2 } from "lucide-react";
+import { Fragment, useEffect, useState } from "react";
+import { MonitorPlay, PlayCircle, Radio, Trash2, Video } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { PageHeader } from "@/components/Ui";
+import { IconTile } from "@/components/Graphics";
 import { ScreenshotUpload } from "@/components/ScreenshotUpload";
 import { STREAM_SETUP_GROUPS as STEPS } from "@/lib/knowledge";
 
@@ -30,7 +31,7 @@ export default function StreamSetupPage() {
 
   return (
     <div>
-      <PageHeader eyebrow="Wirecast → YouTube" title="Live Stream Setup" />
+      <PageHeader eyebrow="Wirecast → YouTube" title="Live Stream Setup" icon={Radio} />
 
       <div className="card p-5 mb-6">
         <SignalFlowDiagram />
@@ -127,23 +128,32 @@ function StepCard({
 }
 
 function SignalFlowDiagram() {
-  const nodes = ["Camera + Mic", "Wirecast", "RTMP", "YouTube Live"];
+  const nodes = [
+    { label: "Camera + Mic", icon: Video },
+    { label: "Wirecast", icon: MonitorPlay },
+    { label: "RTMP", icon: Radio },
+    { label: "YouTube Live", icon: PlayCircle },
+  ];
   return (
-    <div className="flex items-center justify-between flex-wrap gap-3">
-      {nodes.map((n, i) => (
-        <div key={n} className="flex items-center gap-3">
-          <div
-            className="px-4 py-2.5 rounded-lg border text-sm text-center"
-            style={{
-              borderColor: i === nodes.length - 1 ? "var(--tally)" : "var(--border)",
-              color: i === nodes.length - 1 ? "var(--tally)" : "var(--text)",
-            }}
-          >
-            {n}
-          </div>
-          {i < nodes.length - 1 && <ArrowRight size={16} className="text-muted-2" />}
-        </div>
-      ))}
+    <div className="flex flex-col sm:flex-row sm:items-center gap-2">
+      {nodes.map((n, i) => {
+        const last = i === nodes.length - 1;
+        return (
+          <Fragment key={n.label}>
+            <div
+              className="flex sm:flex-col items-center gap-3 sm:gap-2 px-4 py-3 rounded-xl border text-sm sm:min-w-28"
+              style={{
+                borderColor: last ? "var(--tally)" : "var(--border)",
+                boxShadow: last ? "0 0 24px rgb(228 72 60 / 0.2)" : undefined,
+              }}
+            >
+              <IconTile icon={n.icon} color={last ? "var(--tally)" : "var(--muted)"} />
+              {n.label}
+            </div>
+            {!last && <span className="flow-line" />}
+          </Fragment>
+        );
+      })}
     </div>
   );
 }
