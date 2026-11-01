@@ -6,7 +6,8 @@ import { AlertTriangle, ExternalLink, MapPin, PlayCircle, Quote, ShieldCheck, Us
 import { supabase } from "@/lib/supabase";
 import { getSundays, isoDate, shortLabel } from "@/lib/dates";
 import { useMember } from "@/components/MemberProvider";
-import { Avatar, Panel, StatCard } from "@/components/Ui";
+import { Avatar, Panel, roleIcon, StatCard } from "@/components/Ui";
+import { ControlRoomArt } from "@/components/MediaArt";
 import { ProgressRing, SignalRings, StageLights } from "@/components/Graphics";
 
 const YOUTUBE_URL = "https://www.youtube.com/@zefcchurchtv2560";
@@ -147,38 +148,43 @@ export default function HomePage() {
         </span>
       </div>
 
-      <div className="card relative overflow-hidden p-6 md:p-8 mb-3">
-        <StageLights className="absolute inset-x-0 top-0 w-full h-full" />
-        <SignalRings className="absolute top-0 right-0 h-72 w-72" />
-        <div className="relative flex items-center justify-between gap-4">
-          <div className="min-w-0">
-            <p className="eyebrow mb-2 flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-tally tally-dot" />
-              This Sunday · {countdownLabel(thisSunday)}
-            </p>
-            <p className="text-4xl md:text-5xl mb-2" style={{ fontFamily: "var(--font-head)" }}>
-              {shortLabel(thisSunday)}
-            </p>
-            <p className="text-sm text-muted mb-5">
-              {myRoles.length > 0 ? (
-                <>
-                  You&apos;re on <span className="text-tally font-medium">{myRoles.join(" & ")}</span>
-                </>
-              ) : (
-                "You're not assigned to a role yet"
-              )}
-            </p>
-            <a href={YOUTUBE_URL} target="_blank" rel="noreferrer" className="btn btn-secondary whitespace-nowrap">
-              <PlayCircle size={15} className="text-tally" /> Watch on YouTube{" "}
-              <ExternalLink size={13} className="text-muted-2 hidden sm:inline" />
-            </a>
+      <div className="card overflow-hidden mb-3">
+        <div className="h-44 md:h-60 border-b border-border">
+          <ControlRoomArt />
+        </div>
+        <div className="relative overflow-hidden p-6 md:p-8">
+          <StageLights className="absolute inset-x-0 top-0 w-full h-full" />
+          <SignalRings className="absolute top-0 right-0 h-72 w-72" />
+          <div className="relative flex items-center justify-between gap-4">
+            <div className="min-w-0">
+              <p className="eyebrow mb-2 flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-tally tally-dot" />
+                This Sunday · {countdownLabel(thisSunday)}
+              </p>
+              <p className="text-4xl md:text-5xl mb-2" style={{ fontFamily: "var(--font-head)" }}>
+                {shortLabel(thisSunday)}
+              </p>
+              <p className="text-sm text-muted mb-5">
+                {myRoles.length > 0 ? (
+                  <>
+                    You&apos;re on <span className="text-tally font-medium">{myRoles.join(" & ")}</span>
+                  </>
+                ) : (
+                  "You're not assigned to a role yet"
+                )}
+              </p>
+              <a href={YOUTUBE_URL} target="_blank" rel="noreferrer" className="btn btn-secondary whitespace-nowrap">
+                <PlayCircle size={15} className="text-tally" /> Watch on YouTube{" "}
+                <ExternalLink size={13} className="text-muted-2 hidden sm:inline" />
+              </a>
+            </div>
+            <Link href="/checklist" title="Open the Sunday checklist" className="flex flex-col items-center gap-2 shrink-0">
+              <ProgressRing pct={loading ? 0 : pct} size={92} />
+              <span className="text-xs text-muted whitespace-nowrap">
+                {loading ? "Checklist" : allDone ? "All done" : `${doneCount} of ${totalItems} done`}
+              </span>
+            </Link>
           </div>
-          <Link href="/checklist" title="Open the Sunday checklist" className="flex flex-col items-center gap-2 shrink-0">
-            <ProgressRing pct={loading ? 0 : pct} size={92} />
-            <span className="text-xs text-muted whitespace-nowrap">
-              {loading ? "Checklist" : allDone ? "All done" : `${doneCount} of ${totalItems} done`}
-            </span>
-          </Link>
         </div>
       </div>
 
@@ -225,21 +231,27 @@ export default function HomePage() {
             <p className="text-sm text-muted-2">No roles set up yet — an admin can add some on the Calendar page.</p>
           ) : (
             <div className="grid sm:grid-cols-2 gap-x-6 gap-y-3">
-              {lineup.map((l) => (
-                <div key={l.role} className="flex items-center gap-3 min-w-0">
-                  {l.name ? (
-                    <Avatar name={l.name} highlight={l.name === me} />
-                  ) : (
-                    <span className="w-7 h-7 rounded-full border border-dashed border-border shrink-0" />
-                  )}
-                  <div className="min-w-0">
-                    <p className="text-sm truncate" style={{ color: l.name ? "var(--text)" : "var(--muted-2)" }}>
-                      {l.name ?? "Open"}
-                    </p>
-                    <p className="text-xs text-muted-2 truncate">{l.role}</p>
+              {lineup.map((l) => {
+                const RoleIcon = roleIcon(l.role);
+                return (
+                  <div key={l.role} className="flex items-center gap-3 min-w-0">
+                    {l.name ? (
+                      <Avatar name={l.name} highlight={l.name === me} />
+                    ) : (
+                      <span className="w-7 h-7 rounded-full border border-dashed border-border shrink-0" />
+                    )}
+                    <div className="min-w-0">
+                      <p className="text-sm truncate" style={{ color: l.name ? "var(--text)" : "var(--muted-2)" }}>
+                        {l.name ?? "Open"}
+                      </p>
+                      <p className="text-xs text-muted-2 flex items-center gap-1 min-w-0">
+                        <RoleIcon size={12} className="text-tally shrink-0" />
+                        <span className="truncate">{l.role}</span>
+                      </p>
+                    </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </Panel>

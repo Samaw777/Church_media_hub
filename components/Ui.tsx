@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import type { LucideIcon } from "lucide-react";
+import { Aperture, Camera, Clapperboard, Lightbulb, Mic, Presentation, Radio, type LucideIcon } from "lucide-react";
 import { IconTile, SignalRings } from "./Graphics";
 
 const AVATAR_COLORS = ["#6f9df2", "#3fb88a", "#e3a83d", "#b98ae0", "#4fb6c9", "#e58a6d"];
@@ -10,6 +10,17 @@ function avatarColor(name: string) {
   let hash = 0;
   for (const ch of name) hash = (hash * 31 + ch.charCodeAt(0)) >>> 0;
   return AVATAR_COLORS[hash % AVATAR_COLORS.length];
+}
+
+export function roleIcon(role: string): LucideIcon {
+  const name = role.toLowerCase();
+  if (/photo/.test(name)) return Aperture;
+  if (/cam|video/.test(name)) return Camera;
+  if (/sound|audio|mic|mix/.test(name)) return Mic;
+  if (/stream|live|online|wirecast/.test(name)) return Radio;
+  if (/slide|lyric|project|present|screen/.test(name)) return Presentation;
+  if (/light/.test(name)) return Lightbulb;
+  return Clapperboard;
 }
 
 export function Brand({ size = "md" }: { size?: "md" | "lg" }) {
@@ -47,26 +58,31 @@ export function PageHeader({
   title,
   right,
   icon,
+  art,
 }: {
   eyebrow: string;
   title: string;
   right?: React.ReactNode;
   icon?: LucideIcon;
+  art?: React.ReactNode;
 }) {
   return (
-    <div className="card relative overflow-hidden mb-6 p-5 md:p-6">
-      <SignalRings className="absolute top-0 right-0 h-56 w-56" />
-      <div className="relative flex items-center justify-between flex-wrap gap-3">
-        <div className="flex items-center gap-4 min-w-0">
-          {icon && <IconTile icon={icon} />}
-          <div className="min-w-0">
-            <p className="eyebrow mb-1">{eyebrow}</p>
-            <h1 className="text-3xl" style={{ fontFamily: "var(--font-head)" }}>
-              {title}
-            </h1>
+    <div className="card overflow-hidden mb-6">
+      {art && <div className="h-28 md:h-36 border-b border-border">{art}</div>}
+      <div className="relative overflow-hidden p-5 md:p-6">
+        <SignalRings className="absolute top-0 right-0 h-56 w-56" />
+        <div className="relative flex items-center justify-between flex-wrap gap-3">
+          <div className="flex items-center gap-4 min-w-0">
+            {icon && <IconTile icon={icon} />}
+            <div className="min-w-0">
+              <p className="eyebrow mb-1">{eyebrow}</p>
+              <h1 className="text-3xl" style={{ fontFamily: "var(--font-head)" }}>
+                {title}
+              </h1>
+            </div>
           </div>
+          {right}
         </div>
-        {right}
       </div>
     </div>
   );

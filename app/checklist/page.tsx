@@ -6,6 +6,7 @@ import { supabase } from "@/lib/supabase";
 import { getSundays, isoDate, shortLabel, timeLabel } from "@/lib/dates";
 import { useMember } from "@/components/MemberProvider";
 import { PageHeader } from "@/components/Ui";
+import { GearArt } from "@/components/MediaArt";
 import { ProgressRing } from "@/components/Graphics";
 import type { ChecklistItem, ChecklistState } from "@/lib/types";
 import { DEFAULT_CHECKLIST_ITEMS as DEFAULT_ITEMS } from "@/lib/knowledge";
@@ -99,6 +100,7 @@ export default function ChecklistPage() {
         eyebrow={shortLabel(sunday)}
         title="Sunday Checklist"
         icon={ListChecks}
+        art={<GearArt />}
         right={
           isAdmin ? (
             <button

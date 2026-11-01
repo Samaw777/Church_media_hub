@@ -6,6 +6,7 @@ import { supabase } from "@/lib/supabase";
 import { getSundays, isoDate, isToday, shortLabel, timeLabel } from "@/lib/dates";
 import { useMember } from "@/components/MemberProvider";
 import { PageHeader } from "@/components/Ui";
+import { CrewArt } from "@/components/MediaArt";
 import type { AvailabilityStatus } from "@/lib/types";
 
 const AVAIL_META: Record<AvailabilityStatus, { label: string; color: string }> = {
@@ -20,7 +21,7 @@ export default function SchedulePage() {
 
   return (
     <div>
-      <PageHeader eyebrow="Availability & check-in" title="Schedule" icon={Calendar} />
+      <PageHeader eyebrow="Availability & check-in" title="Schedule" icon={Calendar} art={<CrewArt />} />
       <div className="space-y-4">
         {sundays.map((d) => (
           <SundayCard key={isoDate(d)} date={d} roster={roster} />

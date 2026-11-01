@@ -6,6 +6,7 @@ import { supabase } from "@/lib/supabase";
 import { timeLabel } from "@/lib/dates";
 import { useMember } from "@/components/MemberProvider";
 import { PageHeader } from "@/components/Ui";
+import { TestCardArt } from "@/components/MediaArt";
 import { IconTile } from "@/components/Graphics";
 import { ScreenshotUpload } from "@/components/ScreenshotUpload";
 import type { Issue } from "@/lib/types";
@@ -70,7 +71,7 @@ export default function TroubleshootingPage() {
 
   return (
     <div>
-      <PageHeader eyebrow="Common problems & the log" title="Troubleshooting" icon={Wrench} />
+      <PageHeader eyebrow="Common problems & the log" title="Troubleshooting" icon={Wrench} art={<TestCardArt />} />
 
       <h2 className="section-title mb-3">
         Quick fixes

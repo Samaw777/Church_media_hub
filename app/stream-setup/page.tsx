@@ -4,6 +4,7 @@ import { Fragment, useEffect, useState } from "react";
 import { MonitorPlay, PlayCircle, Radio, Trash2, Video } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { PageHeader } from "@/components/Ui";
+import { OnAirArt } from "@/components/MediaArt";
 import { IconTile } from "@/components/Graphics";
 import { ScreenshotUpload } from "@/components/ScreenshotUpload";
 import { STREAM_SETUP_GROUPS as STEPS } from "@/lib/knowledge";
@@ -31,7 +32,7 @@ export default function StreamSetupPage() {
 
   return (
     <div>
-      <PageHeader eyebrow="Wirecast → YouTube" title="Live Stream Setup" icon={Radio} />
+      <PageHeader eyebrow="Wirecast → YouTube" title="Live Stream Setup" icon={Radio} art={<OnAirArt />} />
 
       <div className="card p-5 mb-6">
         <SignalFlowDiagram />

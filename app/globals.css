@@ -230,7 +230,45 @@ select {
   }
 }
 
+@keyframes eq-bounce {
+  0%,
+  100% {
+    transform: scaleY(0.25);
+  }
+  50% {
+    transform: scaleY(1);
+  }
+}
+.eq-bar {
+  transform-box: fill-box;
+  transform-origin: bottom;
+  animation: eq-bounce 1.3s ease-in-out infinite;
+}
+
+@keyframes comm-dash {
+  to {
+    stroke-dashoffset: -28;
+  }
+}
+.comm-line {
+  stroke-dasharray: 8 6;
+  opacity: 0.6;
+  animation: comm-dash 1.4s linear infinite;
+}
+
+@keyframes film-roll {
+  to {
+    transform: translateX(72px);
+  }
+}
+.film-roll {
+  animation: film-roll 6s linear infinite;
+}
+
 @media (prefers-reduced-motion: reduce) {
+  .eq-bar,
+  .comm-line,
+  .film-roll,
   .tally-dot,
   .ring-pulse,
   .beam,

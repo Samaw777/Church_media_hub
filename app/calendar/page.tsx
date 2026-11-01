@@ -6,6 +6,7 @@ import { supabase } from "@/lib/supabase";
 import { getSundays, isoDate, shortLabel } from "@/lib/dates";
 import { useMember } from "@/components/MemberProvider";
 import { PageHeader } from "@/components/Ui";
+import { ClapperArt } from "@/components/MediaArt";
 import type { Assignment, Role } from "@/lib/types";
 
 export default function CalendarPage() {
@@ -80,6 +81,7 @@ export default function CalendarPage() {
         eyebrow="Who's assigned where"
         title="Calendar"
         icon={CalendarDays}
+        art={<ClapperArt />}
         right={
           isAdmin ? (
             <button
