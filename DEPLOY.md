@@ -41,6 +41,10 @@ You'll also need a **GitHub** account to hold the code.
    - `NEXT_PUBLIC_SUPABASE_URL` — the Project URL from step 1.6
    - `NEXT_PUBLIC_SUPABASE_ANON_KEY` — the anon key from step 1.6
    - `GEMINI_API_KEY` — the key from step 1.7
+   - `GMAIL_USER` and `GMAIL_APP_PASSWORD` — the Gmail address that sends assignment emails and an
+     app password for it (turn on 2-Step Verification, then visit
+     [myaccount.google.com/apppasswords](https://myaccount.google.com/apppasswords)). Also run
+     `supabase/migrations/004_assignment_emails.sql` in the SQL Editor.
 4. Click **Deploy**. After a minute or two you'll get a live URL like `media-team-hub.vercel.app`.
 
 ## 4. Share it with the team

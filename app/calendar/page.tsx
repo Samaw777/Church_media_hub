@@ -18,6 +18,7 @@ export default function CalendarPage() {
   const [assignments, setAssignments] = useState<Assignment[]>([]);
   const [managingRoles, setManagingRoles] = useState(false);
   const [newRole, setNewRole] = useState("");
+  const [emailNotice, setEmailNotice] = useState("");
 
   async function loadRoles() {
     const { data } = await supabase.from("roles").select("*").order("position");
@@ -53,12 +54,26 @@ export default function CalendarPage() {
       await supabase.from("assignments").delete().eq("sunday", sunday).eq("role_id", roleId);
       return;
     }
-    await supabase
+    const { error } = await supabase
       .from("assignments")
       .upsert(
         { sunday, role_id: roleId, member_name: memberName, assigned_by: me },
         { onConflict: "sunday,role_id" }
       );
+    if (!error) await emailAssignee(sunday, roleId, memberName);
+  }
+
+  async function emailAssignee(sunday: string, roleId: string, memberName: string) {
+    const { data } = await supabase.auth.getSession();
+    const res = await fetch("/api/notify-assignment", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${data.session?.access_token ?? ""}`,
+      },
+      body: JSON.stringify({ sunday, roleId }),
+    }).catch(() => null);
+    setEmailNotice(res?.ok ? `Emailed ${memberName}` : `Couldn't email ${memberName}, but they're still assigned.`);
   }
 
   async function addRole() {
@@ -119,6 +134,12 @@ export default function CalendarPage() {
             </button>
           </div>
         </div>
+      )}
+
+      {emailNotice && (
+        <p role="status" className="text-sm text-muted mb-3">
+          {emailNotice}
+        </p>
       )}
 
       <div className="overflow-x-auto rounded-xl border border-border">
