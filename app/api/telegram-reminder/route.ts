@@ -50,6 +50,14 @@ function shortDate(isoDate: string) {
   return new Date(`${isoDate}T12:00:00Z`).toLocaleDateString("en-US", { month: "short", day: "numeric", timeZone: "UTC" });
 }
 
+// The public address people open. Vercel's per-deployment addresses sit behind a Vercel
+// login, so prefer SITE_URL, then the project's production domain that Vercel provides.
+function siteUrl(req: NextRequest) {
+  const fromVercel = process.env.VERCEL_PROJECT_PRODUCTION_URL;
+  const url = process.env.SITE_URL || (fromVercel ? `https://${fromVercel}` : req.nextUrl.origin);
+  return url.trim().replace(/\/+$/, "");
+}
+
 async function telegram(method: string, params: Record<string, unknown>) {
   const res = await fetch(`https://api.telegram.org/bot${process.env.TELEGRAM_BOT_TOKEN}/${method}`, {
     method: "POST",
@@ -151,7 +159,7 @@ export async function GET(req: NextRequest) {
     maybe: byStatus("maybe"),
     no: byStatus("no"),
     noReply: names.filter((n) => !status[n]),
-    scheduleUrl: `${process.env.SITE_URL || req.nextUrl.origin}/schedule`,
+    scheduleUrl: `${siteUrl(req)}/schedule`,
   });
 
   if (params.get("preview")) return NextResponse.json({ kind, sunday, text });
