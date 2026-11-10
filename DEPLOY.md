@@ -60,3 +60,38 @@ hardcoded in `002_auth_and_admin.sql`) so you get the admin role automatically.
 - **Changing the checklist template**: use the "Edit list" button on the Checklist page (admin only) — no redeploy needed, it's stored in the database.
 - **Building the schedule**: as admin, use the Calendar page to assign people to roles per Sunday.
 - **Adding more admins**: run `update members set role = 'admin' where name = 'Their Name';` in the Supabase SQL editor.
+
+## Weekly Telegram reminder
+
+The app posts the schedule to the team Telegram group every **Friday at 6:00 pm** and
+**Sunday at 7:00 am** (Central time, daylight saving included). One-time setup:
+
+1. **Create the bot.** In Telegram, message **@BotFather**, send `/newbot`, pick a name, and copy
+   the token it gives you.
+2. **Add the bot to the team group** (group → Add members → search for the bot's username).
+3. **Get the Supabase service key.** Supabase → Project Settings → API → copy the
+   **service_role** key. Keep it private; it can read everything.
+4. **Add these in Vercel** → your project → Settings → Environment Variables, then redeploy:
+
+   | Name | Value |
+   | --- | --- |
+   | `TELEGRAM_BOT_TOKEN` | the token from step 1 |
+   | `SUPABASE_SERVICE_ROLE_KEY` | the key from step 3 |
+   | `CRON_SECRET` | any long random password you make up |
+   | `SITE_URL` | your site address, e.g. `https://media-team-hub.vercel.app` |
+
+5. **Find the group's chat ID.** Open
+   `https://YOUR-SITE/api/telegram-reminder?find-chat=1&key=YOUR_CRON_SECRET` in a browser.
+   It lists the groups the bot was added to. Copy the `id` (a negative number), add it in Vercel
+   as `TELEGRAM_CHAT_ID`, and redeploy.
+6. **Turn on the timer.** GitHub → this repository → Settings → Secrets and variables → Actions →
+   New repository secret. Add `SITE_URL` and `CRON_SECRET` with the same values as in Vercel.
+
+To check it without waiting for Friday:
+
+- See the message without posting: `https://YOUR-SITE/api/telegram-reminder?preview=1&key=YOUR_CRON_SECRET`
+- Post a test now: add `&send=friday` (or `&send=sunday`) instead of `preview=1`.
+- Run the timer by hand: GitHub → Actions → Telegram reminder → Run workflow (it only posts
+  if it's actually Friday 6pm or Sunday 7am Central).
+
+To change the times, edit `POST_AT` in `app/api/telegram-reminder/route.ts`.
