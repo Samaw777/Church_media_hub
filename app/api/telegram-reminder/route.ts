@@ -60,10 +60,19 @@ async function telegram(method: string, params: Record<string, unknown>) {
 }
 
 export async function GET(req: NextRequest) {
-  const secret = process.env.CRON_SECRET;
-  const given = req.headers.get("authorization")?.replace(/^Bearer\s+/i, "") ?? req.nextUrl.searchParams.get("key");
-  if (!secret || given !== secret) {
-    return NextResponse.json({ error: "Not allowed." }, { status: 401 });
+  const secret = process.env.CRON_SECRET?.trim();
+  if (!secret) {
+    return NextResponse.json(
+      { error: "CRON_SECRET isn't set on this deployment. Add it in Vercel (tick Production) and redeploy." },
+      { status: 503 }
+    );
+  }
+  const given = (req.headers.get("authorization")?.replace(/^Bearer\s+/i, "") ?? req.nextUrl.searchParams.get("key") ?? "").trim();
+  if (given !== secret) {
+    return NextResponse.json(
+      { error: "Not allowed: the key in the link doesn't match CRON_SECRET in Vercel." },
+      { status: 401 }
+    );
   }
   const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
   if (!process.env.TELEGRAM_BOT_TOKEN || !serviceKey) {
