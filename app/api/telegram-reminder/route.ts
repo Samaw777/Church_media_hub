@@ -163,6 +163,13 @@ export async function GET(req: NextRequest) {
   });
   if (!result.ok) {
     console.error("telegram sendMessage failed:", result.description);
+    const newId = result.parameters?.migrate_to_chat_id;
+    if (newId) {
+      return NextResponse.json(
+        { error: `Telegram upgraded the group, so its ID changed. Set TELEGRAM_CHAT_ID to ${newId} in Vercel and redeploy.` },
+        { status: 502 }
+      );
+    }
     return NextResponse.json({ error: `Telegram refused: ${result.description}` }, { status: 502 });
   }
 
