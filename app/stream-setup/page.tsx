@@ -34,14 +34,9 @@ export default function StreamSetupPage() {
     <div>
       <PageHeader eyebrow="Wirecast → YouTube" title="Live Stream Setup" icon={Radio} art={<OnAirArt />} />
 
-      <div className="card p-5 mb-6">
+      <div className="card p-5 mb-8">
         <SignalFlowDiagram />
       </div>
-
-      <p className="text-sm text-muted mb-8 leading-relaxed max-w-2xl">
-        These steps cover the direct Wirecast → YouTube path. Upload your own screenshot to any
-        step below — real captures from your own setup will show up here for everyone.
-      </p>
 
       <div className="space-y-8">
         {STEPS.map((group) => (

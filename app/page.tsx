@@ -222,7 +222,7 @@ export default function HomePage() {
           }
         >
           {lineup.length === 0 ? (
-            <p className="text-sm text-muted-2">No roles set up yet — an admin can add some on the Calendar page.</p>
+            <p className="text-sm text-muted-2">No roles set up yet.</p>
           ) : (
             <div className="grid sm:grid-cols-2 gap-x-6 gap-y-3">
               {lineup.map((l) => {
@@ -275,10 +275,6 @@ export default function HomePage() {
           </p>
         </Panel>
         <Panel title="Group chat">
-          <p className="text-sm text-muted mb-3 leading-relaxed">
-            Chat lives outside this app for now — WhatsApp or Slack. Drop the invite link here so
-            the team can find it.
-          </p>
           <ChatLinkEditor initial={chatLink} />
         </Panel>
       </div>

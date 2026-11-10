@@ -120,7 +120,7 @@ export default function TroubleshootingPage() {
           <textarea
             value={description}
             onChange={(e) => setDescription(e.target.value)}
-            placeholder="Details — what you tried, what fixed it (if anything)"
+            placeholder="What you tried and what fixed it"
             rows={3}
             className="field w-full mb-3 resize-none"
           />

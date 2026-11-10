@@ -75,8 +75,7 @@ export function ChatWidget() {
       <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 py-3 space-y-3">
         {messages.length === 0 && (
           <p className="text-sm text-muted-2 leading-relaxed">
-            Ask about stream setup, troubleshooting, or the checklist — e.g. &quot;how do I connect
-            Wirecast to YouTube?&quot;
+            Ask about stream setup, troubleshooting or the checklist.
           </p>
         )}
         {messages.map((m, i) => (
