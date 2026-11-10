@@ -51,6 +51,55 @@ export const STREAM_SETUP_GROUPS = [
   },
 ];
 
+// The four stages of the signal-flow diagram on the stream setup page. `faq` points at
+// TROUBLESHOOTING entries by index; `group` is the STREAM_SETUP_GROUPS section to jump to.
+export const SIGNAL_FLOW_STAGES = [
+  {
+    id: "camera",
+    label: "Camera + Mic",
+    checks: [
+      "Cameras are powered on and showing a clean picture",
+      "Capture cables are seated at both ends",
+      "The soundboard feed is reaching the audio input",
+    ],
+    faq: [0, 1],
+    group: null,
+  },
+  {
+    id: "wirecast",
+    label: "Wirecast",
+    checks: [
+      "The right shot is live in the program window",
+      "Audio meters are moving on the program mix",
+      "Output Settings point at the church YouTube channel",
+    ],
+    faq: [4, 1],
+    group: "In Wirecast",
+  },
+  {
+    id: "rtmp",
+    label: "RTMP",
+    checks: [
+      "Server URL and stream key match today's event",
+      "The streaming computer is on wired ethernet",
+      "Upload speed is at least 1.5x the stream bitrate",
+    ],
+    faq: [2, 3],
+    group: "In YouTube Studio",
+  },
+  {
+    id: "youtube",
+    label: "YouTube Live",
+    checks: [
+      "Stream Health shows Excellent or Good",
+      "The event is switched to Public when service starts",
+      "The stream plays on a phone off the church Wi-Fi",
+    ],
+    faq: [2],
+    group: "Going live",
+  },
+];
+
 export const TROUBLESHOOTING = [
   {
     q: "No picture from a camera in Wirecast",
