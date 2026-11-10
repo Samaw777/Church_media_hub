@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { AlertTriangle, ExternalLink, MapPin, MessageCircle, PlayCircle, Quote, ShieldCheck, Users } from "lucide-react";
+import { AlertTriangle, ExternalLink, MapPin, MessageCircle, PlayCircle, Quote, ShieldCheck, Users, X } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { getSundays, isoDate, shortLabel } from "@/lib/dates";
 import { useMember } from "@/components/MemberProvider";
@@ -256,22 +256,7 @@ export default function HomePage() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-        <Panel title="Team">
-          <div className="flex flex-wrap gap-2">
-            {roster.map((n) => (
-              <span
-                key={n}
-                title={n}
-                className="flex items-center gap-2 text-sm"
-                style={{ color: n === me ? "var(--text)" : "var(--muted)" }}
-              >
-                <Avatar name={n} highlight={n === me} />
-                {n}
-              </span>
-            ))}
-            {roster.length === 0 && <span className="text-sm text-muted-2">No one&apos;s joined yet.</span>}
-          </div>
-        </Panel>
+        <TeamPanel roster={roster} me={me} isAdmin={isAdmin} />
         <Panel title="Word for the team">
           <Quote size={22} className="text-tally mb-2" />
           <p className="text-sm text-muted leading-relaxed" style={{ fontFamily: "var(--font-head)" }}>
@@ -354,5 +339,75 @@ function GroupChat({ link, canEdit, onChange }: { link: string; canEdit: boolean
         </div>
       )}
     </div>
+  );
+}
+
+function TeamPanel({ roster, me, isAdmin }: { roster: string[]; me: string | null; isAdmin: boolean }) {
+  const [managing, setManaging] = useState(false);
+  const [busy, setBusy] = useState<string | null>(null);
+  const [message, setMessage] = useState("");
+
+  async function remove(name: string) {
+    if (!window.confirm(`Remove ${name} from the team?\n\nTheir login is deleted and they're taken off upcoming Sundays. Past Sundays are kept.`)) return;
+    setBusy(name);
+    setMessage("");
+    const { data } = await supabase.auth.getSession();
+    const res = await fetch("/api/remove-member", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${data.session?.access_token ?? ""}` },
+      body: JSON.stringify({ name }),
+    });
+    const body = await res.json().catch(() => ({}));
+    setBusy(null);
+    setMessage(res.ok ? `${name} was removed.` : body.error ?? "Couldn't remove them. Try again.");
+  }
+
+  return (
+    <Panel
+      title="Team"
+      action={
+        isAdmin && roster.length > 0 ? (
+          <button
+            onClick={() => {
+              setManaging((m) => !m);
+              setMessage("");
+            }}
+            className="text-xs text-muted hover:text-text shrink-0"
+          >
+            {managing ? "Done" : "Manage"}
+          </button>
+        ) : undefined
+      }
+    >
+      <div className="flex flex-wrap gap-2">
+        {roster.map((n) => (
+          <span
+            key={n}
+            title={n}
+            className="flex items-center gap-2 text-sm"
+            style={{ color: n === me ? "var(--text)" : "var(--muted)" }}
+          >
+            <Avatar name={n} highlight={n === me} />
+            {n}
+            {managing && n !== me && (
+              <button
+                onClick={() => remove(n)}
+                disabled={busy !== null}
+                aria-label={`Remove ${n}`}
+                className="ml-0.5 mr-1 inline-flex items-center gap-1 rounded-full border border-border px-2 py-0.5 text-xs text-muted-2 hover:text-tally hover:border-tally disabled:opacity-50"
+              >
+                {busy === n ? "Removing…" : (
+                  <>
+                    <X size={12} /> Remove
+                  </>
+                )}
+              </button>
+            )}
+          </span>
+        ))}
+        {roster.length === 0 && <span className="text-sm text-muted-2">No one&apos;s joined yet.</span>}
+      </div>
+      {message && <p className="mt-3 text-xs text-muted">{message}</p>}
+    </Panel>
   );
 }
