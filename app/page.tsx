@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { AlertTriangle, ExternalLink, MapPin, PlayCircle, Quote, ShieldCheck, Users } from "lucide-react";
+import { AlertTriangle, ExternalLink, MapPin, MessageCircle, PlayCircle, Quote, ShieldCheck, Users } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { getSundays, isoDate, shortLabel } from "@/lib/dates";
 import { useMember } from "@/components/MemberProvider";
@@ -44,8 +44,12 @@ function countdownLabel(sunday: Date) {
   return `In ${days} days`;
 }
 
+// The team's group chat. Shown to everyone without any setup; admins can change it
+// from the Group chat card, which stores the new link in settings ("chat-link").
+const DEFAULT_CHAT_LINK = "https://t.me/+GxWxoUxB2wRlZDRh";
+
 export default function HomePage() {
-  const { me, roster } = useMember();
+  const { me, roster, isAdmin } = useMember();
   const thisSunday = getSundays(1)[0];
   const sundayIso = isoDate(thisSunday);
 
@@ -54,7 +58,7 @@ export default function HomePage() {
   const [doneCount, setDoneCount] = useState(0);
   const [totalItems, setTotalItems] = useState(0);
   const [openIssues, setOpenIssues] = useState(0);
-  const [chatLink, setChatLink] = useState("");
+  const [chatLink, setChatLink] = useState(DEFAULT_CHAT_LINK);
   const [loading, setLoading] = useState(true);
   const [lineup, setLineup] = useState<{ role: string; name: string | null }[]>([]);
   const [onlineCount, setOnlineCount] = useState(1);
@@ -76,7 +80,7 @@ export default function HomePage() {
       setTotalItems((items.data ?? []).length);
       setDoneCount((state.data ?? []).length);
       setOpenIssues((issues.data ?? []).length);
-      setChatLink(setting.data?.value ?? "");
+      setChatLink(setting.data?.value || DEFAULT_CHAT_LINK);
       setLoading(false);
     }
     load();
@@ -275,46 +279,79 @@ export default function HomePage() {
           </p>
         </Panel>
         <Panel title="Group chat">
-          <ChatLinkEditor initial={chatLink} />
+          <GroupChat link={chatLink} canEdit={isAdmin} onChange={setChatLink} />
         </Panel>
       </div>
     </div>
   );
 }
 
-function ChatLinkEditor({ initial }: { initial: string }) {
-  const [draft, setDraft] = useState(initial);
-  const [saved, setSaved] = useState(initial);
+function chatAppName(link: string) {
+  if (/t\.me|telegram/i.test(link)) return "Telegram";
+  if (/whatsapp/i.test(link)) return "WhatsApp";
+  return "group chat";
+}
 
-  useEffect(() => setDraft(initial), [initial]);
+function GroupChat({ link, canEdit, onChange }: { link: string; canEdit: boolean; onChange: (link: string) => void }) {
+  const [editing, setEditing] = useState(false);
+  const [draft, setDraft] = useState(link);
+  const [error, setError] = useState("");
 
   async function save() {
-    await supabase.from("settings").upsert({ key: "chat-link", value: draft.trim() });
-    setSaved(draft.trim());
+    const value = draft.trim();
+    if (!/^https?:\/\//.test(value)) {
+      setError("Paste the full invite link, starting with https://");
+      return;
+    }
+    const { error } = await supabase.from("settings").upsert({ key: "chat-link", value });
+    if (error) {
+      setError("Couldn't save the link. Try again.");
+      return;
+    }
+    onChange(value);
+    setError("");
+    setEditing(false);
   }
 
   return (
     <div>
-      <div className="flex gap-2">
-        <input
-          value={draft}
-          onChange={(e) => setDraft(e.target.value)}
-          placeholder="https://chat.whatsapp.com/..."
-          className="field flex-1 min-w-0"
-        />
-        <button onClick={save} className="btn btn-secondary">
-          Save
-        </button>
-      </div>
-      {saved && (
-        <a
-          href={saved}
-          target="_blank"
-          rel="noreferrer"
-          className="mt-3 inline-flex items-center gap-1.5 text-sm text-ok"
+      <a href={link} target="_blank" rel="noreferrer" className="btn btn-primary w-full">
+        <MessageCircle size={16} />
+        {chatAppName(link) === "group chat" ? "Open group chat" : `Open ${chatAppName(link)} group`}
+        <ExternalLink size={13} />
+      </a>
+
+      {canEdit && !editing && (
+        <button
+          onClick={() => {
+            setDraft(link);
+            setEditing(true);
+          }}
+          className="mt-3 text-xs text-muted-2 hover:text-text"
         >
-          Open group chat <ExternalLink size={13} />
-        </a>
+          Change link
+        </button>
+      )}
+
+      {canEdit && editing && (
+        <div className="mt-3">
+          <div className="flex gap-2">
+            <input
+              value={draft}
+              onChange={(e) => setDraft(e.target.value)}
+              placeholder="https://t.me/..."
+              className="field flex-1 min-w-0"
+              autoFocus
+            />
+            <button onClick={save} className="btn btn-secondary">
+              Save
+            </button>
+          </div>
+          {error && <p className="mt-2 text-xs text-tally">{error}</p>}
+          <button onClick={() => setEditing(false)} className="mt-2 text-xs text-muted-2 hover:text-text">
+            Cancel
+          </button>
+        </div>
       )}
     </div>
   );
