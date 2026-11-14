@@ -4,9 +4,11 @@ import { buildReminderText, type ReminderKind } from "@/lib/reminder";
 
 // Posts the weekly schedule reminder to the team Telegram group.
 //
-// Called every hour on Fridays and Sundays by .github/workflows/telegram-reminder.yml.
-// It only posts at the right local time (Fri 6pm, Sun 7am Central, daylight saving
-// included) and at most once per day, so the timer can be loose.
+// Woken by Vercel Cron (vercel.json: Friday evening and Sunday morning) with the GitHub
+// workflow in .github/workflows as a backup. Each reminder has a window rather than an
+// exact minute, because neither timer is precise: the Friday one goes out from Fri 6pm
+// until Saturday night, the Sunday one from 7am until noon (Central time, daylight
+// saving included). Each reminder posts once per Sunday, however many timers fire.
 //
 // Query options (all need the CRON_SECRET):
 //   ?preview=1            return the message without posting
@@ -14,9 +16,11 @@ import { buildReminderText, type ReminderKind } from "@/lib/reminder";
 //   ?find-chat=1          list groups the bot has been added to (to get TELEGRAM_CHAT_ID)
 
 const TIME_ZONE = "America/Chicago";
-const POST_AT: Record<ReminderKind, { weekday: string; hour: number }> = {
-  friday: { weekday: "Fri", hour: 18 },
-  sunday: { weekday: "Sun", hour: 7 },
+const DAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+// Posting windows in hours from Sunday 00:00 Central: [start, end).
+const WINDOWS: Record<ReminderKind, [number, number]> = {
+  friday: [5 * 24 + 18, 7 * 24], // Fri 6pm until Saturday midnight
+  sunday: [7, 12], // Sun 7am until noon
 };
 
 function localNow() {
@@ -59,12 +63,16 @@ function siteUrl(req: NextRequest) {
 }
 
 async function telegram(method: string, params: Record<string, unknown>) {
-  const res = await fetch(`https://api.telegram.org/bot${process.env.TELEGRAM_BOT_TOKEN}/${method}`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(params),
-  });
-  return res.json();
+  try {
+    const res = await fetch(`https://api.telegram.org/bot${process.env.TELEGRAM_BOT_TOKEN}/${method}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(params),
+    });
+    return await res.json();
+  } catch (e) {
+    return { ok: false, description: `couldn't reach Telegram (${(e as Error).message})` };
+  }
 }
 
 export async function GET(req: NextRequest) {
@@ -107,9 +115,10 @@ export async function GET(req: NextRequest) {
   const forced = params.get("send") as ReminderKind | null;
   let kind: ReminderKind | null = forced === "friday" || forced === "sunday" ? forced : null;
   if (!kind) {
+    const hourOfWeek = DAYS.indexOf(now.weekday) * 24 + now.hour;
     kind =
-      (Object.keys(POST_AT) as ReminderKind[]).find(
-        (k) => POST_AT[k].weekday === now.weekday && POST_AT[k].hour === now.hour
+      (Object.keys(WINDOWS) as ReminderKind[]).find(
+        (k) => hourOfWeek >= WINDOWS[k][0] && hourOfWeek < WINDOWS[k][1]
       ) ?? null;
   }
   if (!kind && params.get("preview")) kind = now.weekday === "Sun" ? "sunday" : "friday";
@@ -118,17 +127,18 @@ export async function GET(req: NextRequest) {
   }
 
   // The Sunday this reminder is about: two days ahead on Friday, today on Sunday.
-  const daysAhead = kind === "sunday" ? 0 : (7 - ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].indexOf(now.weekday)) % 7;
+  const daysAhead = kind === "sunday" ? 0 : (7 - DAYS.indexOf(now.weekday)) % 7;
   const sunday = addDays(now.date, daysAhead);
 
   const db = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL as string, serviceKey, {
     auth: { persistSession: false, autoRefreshToken: false },
   });
 
-  const sentKey = `telegram-reminder-${kind}-${now.date}`;
+  // Keyed by the Sunday it's about, so a late catch-up on Saturday can't post twice.
+  const sentKey = `telegram-reminder-${kind}-${sunday}`;
   if (!forced && !params.get("preview")) {
     const { data: already } = await db.from("settings").select("key").eq("key", sentKey).maybeSingle();
-    if (already) return NextResponse.json({ skipped: "Already posted today." });
+    if (already) return NextResponse.json({ skipped: `Already posted the ${kind} reminder for ${sunday}.` });
   }
 
   const [members, roles, assignments, availability] = await Promise.all([

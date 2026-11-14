@@ -1,5 +1,6 @@
-# Wakes the site once an hour on Fridays and Sundays (UTC). The site itself decides
-# whether it's time to post (Fri 6pm / Sun 7am Central) and never posts twice a day.
+# Backup timer for the Telegram reminder (the main one is Vercel Cron in vercel.json).
+# GitHub often skips scheduled runs, so this just gives extra chances; the site decides
+# whether it's inside a posting window and never posts the same reminder twice.
 # Needs two repository secrets: SITE_URL (e.g. https://your-app.vercel.app) and CRON_SECRET.
 name: Telegram reminder
 

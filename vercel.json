@@ -1,0 +1,7 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "crons": [
+    { "path": "/api/telegram-reminder", "schedule": "0 0 * * 6" },
+    { "path": "/api/telegram-reminder", "schedule": "0 13 * * 0" }
+  ]
+}

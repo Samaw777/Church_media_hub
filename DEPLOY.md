@@ -63,8 +63,10 @@ hardcoded in `002_auth_and_admin.sql`) so you get the admin role automatically.
 
 ## Weekly Telegram reminder
 
-The app posts the schedule to the team Telegram group every **Friday at 6:00 pm** and
-**Sunday at 7:00 am** (Central time, daylight saving included). One-time setup:
+The app posts the schedule to the team Telegram group every **Friday evening (from 6:00 pm)** and
+**Sunday morning (from 7:00 am)**, Central time. Vercel Cron (`vercel.json`) is the main timer and
+the GitHub workflow is a backup. If a timer runs late, the Friday reminder still goes out until
+Saturday night and the Sunday one until noon; each is posted only once. One-time setup:
 
 1. **Create the bot.** In Telegram, message **@BotFather**, send `/newbot`, pick a name, and copy
    the token it gives you.
@@ -84,14 +86,17 @@ The app posts the schedule to the team Telegram group every **Friday at 6:00 pm*
    `https://YOUR-SITE/api/telegram-reminder?find-chat=1&key=YOUR_CRON_SECRET` in a browser.
    It lists the groups the bot was added to. Copy the `id` (a negative number), add it in Vercel
    as `TELEGRAM_CHAT_ID`, and redeploy.
-6. **Turn on the timer.** GitHub → this repository → Settings → Secrets and variables → Actions →
-   New repository secret. Add `SITE_URL` and `CRON_SECRET` with the same values as in Vercel.
+6. **Turn on the backup timer.** GitHub → this repository → Settings → Secrets and variables →
+   Actions → New repository secret. Add `SITE_URL` and `CRON_SECRET` with the same values as in
+   Vercel. (Vercel Cron needs nothing extra: it uses `CRON_SECRET` automatically.)
 
 To check it without waiting for Friday:
 
 - See the message without posting: `https://YOUR-SITE/api/telegram-reminder?preview=1&key=YOUR_CRON_SECRET`
 - Post a test now: add `&send=friday` (or `&send=sunday`) instead of `preview=1`.
-- Run the timer by hand: GitHub → Actions → Telegram reminder → Run workflow (it only posts
-  if it's actually Friday 6pm or Sunday 7am Central).
+- Run the backup timer by hand: GitHub → Actions → Telegram reminder → Run workflow (it only
+  posts inside a posting window, and never twice).
+- Vercel → your project → Settings → Cron Jobs shows the scheduled runs and their logs.
 
-To change the times, edit `POST_AT` in `app/api/telegram-reminder/route.ts`.
+To change the times, edit `WINDOWS` in `app/api/telegram-reminder/route.ts` and the schedules in
+`vercel.json` (Vercel Cron uses UTC: 6pm Central is 00:00 UTC in winter, 23:00 UTC in summer).
